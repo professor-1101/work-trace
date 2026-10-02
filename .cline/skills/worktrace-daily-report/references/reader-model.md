@@ -1,7 +1,10 @@
 # Reader Model & Terminology Rules
 
-The report is written for the **reader**, not for the repository. Load this
-reference while drafting titles and narratives, and again before finalizing.
+The report is written for the **reader**, not for the repository (**RULE-02** —
+Reader-Centered Abstraction, canonical specification in approved-rules.md). Load
+this reference while drafting titles and narratives, and again before finalizing.
+Retain or translate internal terminology when it provides necessary context; do
+not treat it as universally forbidden.
 
 ## 1. Internal references are not context
 

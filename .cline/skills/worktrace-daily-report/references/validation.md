@@ -44,7 +44,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-## Final acceptance tests (16; run per Work Item)
+## Final acceptance tests (17; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -64,6 +64,7 @@ pairs two different snapshots is rejected at creation time."
 | 14 | Grouping | Two independent outcomes merged |
 | 15 | Revert | Reverted implementation reported as final accomplishment |
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
+| 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
 
 ## Reject patterns (distilled)
 
@@ -111,6 +112,19 @@ pairs two different snapshots is rejected at creation time."
   unless the evidence quantifies.
 - **AP-16 False completion** — partial/blocked work asserted as done. Fix: explicit
   status line; never claim completeness the evidence does not support.
+- **AP-17 Activity-metric reporting** (RULE-01) — hours logged, commit counts, file
+  counts, or line churn presented without outcome context. Fix: report the verified
+  technical state change; reframe or omit activity volume.
+- **AP-18 Untranslated internal identifiers** (RULE-02) — ticket keys, class/method
+  names, or capability flags left raw where they add no reader meaning. Fix:
+  translate to domain purpose or omit; retain only when genuinely informative.
+- **AP-19 Diff-mechanics-only item** (RULE-03) — file/function-level changes with no
+  system-level meaning stated even though evidence supports one. Fix: answer what
+  became possible/observable/enforceable/testable; if unsupported, keep the
+  localized technical outcome concise without forcing significance.
+- **AP-20 Detail misselection** (RULE-04) — contract/security/validation-relevant
+  detail dropped, or routine syntax edits, minor styling tweaks, and sub-version
+  bumps reported as substance. Fix: keep material detail in concise form; cut noise.
 
 ## PASS/FAIL scorecard (final gate)
 
@@ -120,6 +134,7 @@ commit-summary-free · outcome-oriented · reader-oriented · planning-jargon-fr
 evidence-fidelity · greenfield-handling · revert-handling · limitation-visibility ·
 technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
-term-meaningfulness · capability-first · no-decorative-emoji.
+term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
+(RULE-01..RULE-04 incl. exceptions).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.

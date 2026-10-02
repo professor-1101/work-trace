@@ -67,8 +67,12 @@ and do not quantify impact when no quantified evidence exists.
 
 ## 5. System significance vs business value
 
-System significance explains what the change means at the system level — it is not
-business value.
+Per **RULE-03** (see approved-rules.md): do not stop at what changed technically;
+when evidence supports it, explain what became possible, different, observable,
+controllable, enforceable, or testable at the system level. Do not force a
+significance statement when no system-level consequence is supported — state the
+localized technical outcome concisely instead. System significance explains what
+the change means at the system level — it is not business value.
 
 - GOOD: Technical significance: "a stored state remains readable even after creation
   validation was tightened"; "running Git inside specs no longer inherits the main
@@ -135,7 +139,11 @@ accounts."
 
 ## 11. Technical detail policy
 
-Include implementation specifics only when needed to understand the outcome.
+Per **RULE-04** (see approved-rules.md): retain technical details that materially
+explain behavior, constraints, architecture, security boundaries, performance
+characteristics, public contracts, or validation; filter out low-level
+implementation noise, routine syntax edits, and internal refactoring clutter. Do
+not treat all technical details as noise.
 
 - Valuable when shape of outcome depends on it: "ELK layered layout with orthogonal
   routing."

@@ -68,7 +68,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 16 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 17 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -102,11 +102,22 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   not invent root causes, lessons learned, or architectural conclusions about the
   failed attempt unless the evidence states them.
 
-## Step 2 — Write at outcome level, not activity level
+## Approved rule set (canonical source of truth)
+
+Four approved reporting rules are defined verbatim in
+[references/approved-rules.md](references/approved-rules.md): **RULE-01 Outcome
+over Activity**, **RULE-02 Reader-Centered Abstraction**, **RULE-03 System-Level
+Meaning**, **RULE-04 Relevant Technical Detail**. They apply to every Work Item.
+The operational guidance in Steps 1–4 and the reference files restates them for
+execution flow; where wording differs, `approved-rules.md` is canonical, including
+its application conditions and exceptions (e.g., RULE-01/RULE-02 do not apply to
+line-by-line diff audits or developer-to-developer review contexts).
+
+## Step 2 — Write at outcome level, not activity level (RULE-01, RULE-03)
 
 | Level | Example | Verdict |
 |-------|---------|---------|
-| 0 Activity | "File X changed; 17 files touched." | Rejected |
+| 0 Activity | "File X changed; 17 files touched." (also hours logged, commit counts, line churn — RULE-01) | Rejected |
 | 1 Technical action | "Validation logic was redesigned." | Acceptable but usually insufficient |
 | 2 Engineering outcome | "Validation logic was redesigned so Y is enforced." | Good |
 | 3 System significance | "...so stored states remain readable while creation now rejects Z." | Best, when evidence allows |
@@ -121,14 +132,17 @@ Do not confuse: implementation mechanism with capability; UI-level behavior with
 system-wide enforcement; test coverage with correctness; a refactor with a
 business outcome; a design/planning reference with system context.
 
-Do not over-correct the vocabulary: keep technical terms that carry meaning for a
-technical reader (API, E2E, Integration Test, RBAC, Database, Graph, Baseline,
-Traceability, Architecture). The goal is not "simplify everything" — it is
-**remove unnecessary internal detail while preserving useful engineering
-meaning**. Keep implementation details that materially explain behavior,
-constraint, or architectural significance; drop names that add noise (helper and
-hook identifiers, layer paths, line counts). Detail-budget examples live in
-[references/patterns.md](references/patterns.md) (P8).
+Detail selection follows **RULE-04**: retain technical detail that materially
+explains behavior, constraints, architecture, security boundaries, performance
+characteristics, public contracts, or validation; filter out low-level noise,
+routine syntax edits, and refactoring clutter. Do not over-correct the
+vocabulary: keep technical terms that carry meaning for a technical reader (API,
+E2E, Integration Test, RBAC, Database, Graph, Baseline, Traceability,
+Architecture). The goal is not "simplify everything" — it is **remove
+unnecessary internal detail while preserving useful engineering meaning**. Drop
+names that add noise (helper and hook identifiers, layer paths, line counts).
+Detail-budget examples live in [references/patterns.md](references/patterns.md)
+(P8).
 
 Context is optional: never force a "why". Types (problem-driven, feature-driven,
 greenfield, engineering-driven, architectural-constraint, investigation-driven),
@@ -164,9 +178,9 @@ writing any sentence that claims a *why*, an *impact*, or a
 - File counts and LOC appear only when scope/migration/unusual size genuinely matters.
 
 Before finalizing, apply the reader-facing checks in
-[references/reader-model.md](references/reader-model.md): the self-explanatory vs
-opaque terminology classes, the internal-reference rule, and the Reader Independence
-Test.
+[references/reader-model.md](references/reader-model.md) (operational form of
+**RULE-02**): the self-explanatory vs opaque terminology classes, the
+internal-reference rule, and the Reader Independence Test.
 
 ## Step 4 — Language and tone (skill is English; report may be Persian)
 
@@ -183,21 +197,26 @@ files, references, examples, headings, or metadata; use plain Markdown only.
 
 ## Step 5 — Self-check before delivering
 
-Run every Work Item through the 16 acceptance tests, both Definitions of Done
+Run every Work Item through the 17 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
-[references/validation.md](references/validation.md). Fix anything that fails; if a
-claim cannot be defended from the evidence, remove or downgrade the claim — never
-invent support for it. Deliver only when every dimension passes.
+[references/validation.md](references/validation.md); test 17 checks each Work
+Item against RULE-01..RULE-04 as specified in
+[references/approved-rules.md](references/approved-rules.md). Fix anything that
+fails; if a claim cannot be defended from the evidence, remove or downgrade the
+claim — never invent support for it. Deliver only when every dimension passes.
 
 ## Reference files (load on demand)
 
+- [references/approved-rules.md](references/approved-rules.md) — canonical
+  RULE-01..RULE-04 specifications (normative rules, application conditions,
+  exceptions, decision guidance, good/bad examples).
 - [references/evidence-rules.md](references/evidence-rules.md) — context types,
   greenfield rule, forbidden invented facts, strongest-supported-claim principle,
   no-forced-business-framing, evidence-grounded vs evidence-limited, verb-scope
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 16 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 17 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
 - [assets/report-template.md](assets/report-template.md) — exact output skeleton.
