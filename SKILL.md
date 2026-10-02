@@ -33,7 +33,7 @@ description: >
 یعنی: برای Engineer قابل احترام (دقیق و technical)، برای CTO قابل فهم (outcome و جایگاه تغییر)، برای audit قابل اتکا (فراتر از evidence نمی‌رود).
 
 **جایگاه اجرای Skill (معماری WorkTRACE):** این سند، **استاندارد و قرارداد تولید گزارش** است — خودِ این فایل را به‌عنوان «گزارش» منتشر نکن. Workflow مورد انتظار:
-1. این Skill (و قوانین آن) در مخزن `work-trace` نگه داشته و publish می‌شود.
+1. این Skill (و قوانین آن) در مخزن `work-trace` نگه داشته و publish می‌شود (`https://github.com/professor-1101/work-trace`).
 2. یک **مدل اجرایی** (report generator) این Skill را به‌عنوان system/skill prompt دریافت می‌کند.
 3. مدل، شواهد خام (commits/diffs/tests/context) را می‌خواند و گزارش روزانه را **بر اساس همین قوانین** تولید می‌کند.
 4. خروجی مدل باید با Self-Check نهایی (Step 10) سنجیده شود؛ هر FAIL یعنی برگشت و بازتولید، نه تحویل.
