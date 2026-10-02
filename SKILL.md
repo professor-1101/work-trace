@@ -32,6 +32,14 @@ description: >
 
 یعنی: برای Engineer قابل احترام (دقیق و technical)، برای CTO قابل فهم (outcome و جایگاه تغییر)، برای audit قابل اتکا (فراتر از evidence نمی‌رود).
 
+**جایگاه اجرای Skill (معماری WorkTRACE):** این سند، **استاندارد و قرارداد تولید گزارش** است — خودِ این فایل را به‌عنوان «گزارش» منتشر نکن. Workflow مورد انتظار:
+1. این Skill (و قوانین آن) در مخزن `work-trace` نگه داشته و publish می‌شود.
+2. یک **مدل اجرایی** (report generator) این Skill را به‌عنوان system/skill prompt دریافت می‌کند.
+3. مدل، شواهد خام (commits/diffs/tests/context) را می‌خواند و گزارش روزانه را **بر اساس همین قوانین** تولید می‌کند.
+4. خروجی مدل باید با Self-Check نهایی (Step 10) سنجیده شود؛ هر FAIL یعنی برگشت و بازتولید، نه تحویل.
+
+بنابراین تمام قواعد این سند به‌صورت **دستورالعمل رفتاری برای مدل تولیدکننده** نوشته شده‌اند، نه متن آماده‌ی کپی‌شدن در گزارش.
+
 ## زنجیره‌ی پردازش (Formula)
 
 ```text
@@ -267,6 +275,32 @@ Test decoration نیست؛ اگر بخشی از outcome است ذکر شود، �
 **Tooling/config به‌عنوان outcome مستقل:**
 - ❌ ادغام در Work Item صفحه‌ی Design Coverage («صفحه ... و اصلاح پیکربندی ابزارها»).
 - ✅ Work Item جدا: «ابزارهای بررسی، دایرکتوری‌های گزارش coverage را به‌درستی شناسایی می‌کنند و دیگر توسط tooling نادیده گرفته نمی‌شوند.»
+
+**Migrate با rationale واقعی (نه claim ساختگی):**
+- ❌ «کتابخانه آیکون‌ها به Tabler 3.31.0 migrate شد و وابستگی به `lucide-react` حذف گردید.» (Level 1 — بدون هیچ outcome؛ سؤال CTO: خب چرا؟)
+- ✅ *فقط اگر evidence دارد:* «کتابخانه آیکون به Tabler 3.31.0 منتقل شد و وابستگی `lucide-react` حذف شد تا مجموعه‌ی آیکون مورد استفاده در navigation با سیستم طراحی یکسان شود.»
+- اگر rationale در evidence نیست: لااقل تغییر observable را بگو (حذف یک dependency / یکپارچه‌شدن منبع آیکون) و **چرایی نساز**.
+
+**Limitation در انتهای همان Work Item:**
+- ❌ «اسکریپت smoke برای payload دعوت‌نامه اصلاح شد.» (پنهان‌کردن blocker)
+- ✅ «اسکریپت smoke اکنون payload `{ email, role }` مطابق schemaهای API می‌فرستد؛ با این حال اجرای کامل آن روی database تازه به `404 USER_NOT_FOUND` می‌رسد، چون identityهای ساخته‌شده account معتبر ندارند و ادامه‌ی flow نیازمند ایجاد accountهای متناظر است.»
+
+### Anti-Pattern Catalog (الگوهای تکرارشونده‌ی مردود)
+
+| # | Anti-pattern | مثال مردود | اصلاح |
+|---|---|---|---|
+| AP-1 | Vague internal reference در لباس بی‌طرف | عنوان «... بر اساس طراحی جدید» | capability/behavior در عنوان |
+| AP-2 | History-first writing | شروع پاراگراف با «پس از revert...» | Result-First؛ history در جمله‌ی بعد |
+| AP-3 | Interpretation به‌جای fact | «و از تکرار کد جلوگیری گردد» | «در یک لایه واحد استفاده می‌شود» |
+| AP-4 | Auth/capability خلط | «در صورت عدم احراز هویت حذف می‌شود» | «بدون capability `MANAGE_PROJECT` نمایش داده نمی‌شود» |
+| AP-5 | Fabricated causality | «با ELK پیاده‌سازی شد تا قوانین بصری enforce شوند» | قواعد «در rendering اعمال شدند» |
+| AP-6 | Unscoped prevention | «از ایجاد لینک نامعتبر جلوگیری می‌کند» | «فقط tripleهای مجاز ارائه می‌شود؛ در UI مسدود می‌کند» |
+| AP-7 | Shared-domain merging | Git + E2E + Smoke در یک Work Item | سه Work Item مستقل |
+| AP-8 | Title «X و Y» | «Design Coverage و اصلاح پیکربندی ابزارها» | دو Work Item |
+| AP-9 | Name-dropping | `useGraphAndKinds`, `byCode`, `present`, `entities/trace`, `shared/lib` | حذف؛ فقط اگر فهم outcome را بهتر کند (`ARIA grid` اگر accessibility بخشی از outcome است بماند) |
+| AP-10 | Bare domain term | «captured set همیشه ضبط می‌شود» | «مجموعه روابط ثبت‌شده در نسخه‌ی فریزشده (Baseline) ضبط می‌شود» |
+| AP-11 | Migration without outcome | «به Tabler migrate شد و lucide حذف شد» | rationale با evidence، یا ذکر تغییر observable |
+| AP-12 | Role-blur بین viewها | Matrix و Graph بدون تمایز | «دو view مکمل: Graph برای ساختار روابط، Matrix برای مدیریت روابط Requirement–Test Case» |
 
 ## Step 9 — Reader Model و Internal References (الزامی)
 
