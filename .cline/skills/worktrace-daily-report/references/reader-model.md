@@ -1,0 +1,93 @@
+# Reader Model & Terminology Rules
+
+The report is written for the **reader**, not for the repository. Load this
+reference while drafting titles and narratives, and again before finalizing.
+
+## 1. Internal references are not context
+
+Any reference that only carries meaning inside the project must not appear as
+narrative context: `Phase 2.5`, `U2/U3/U4`, `P5-812`, `PR #143`, ticket IDs, branch
+names, internal codenames, planning labels, milestone names the reader was never
+told about, agent-specific terminology. These may live in metadata/audit trails —
+not in the story.
+
+Rule — for any phrase that requires repo knowledge to understand, do exactly one of:
+
+1. delete it;
+2. translate it into system-level meaning;
+3. keep it only if self-explanatory to the reader.
+
+❌ "Traceability matrix and graph were implemented based on Phase 2.5."
+✅ "Graph and matrix views were implemented for observing and managing
+Requirement–Test Case relationships."
+
+Vague internal pointers count too: **"based on the new design"** carries no
+information (new relative to what?) and belongs in the same bin as `Phase 2.5`.
+
+## 2. Terminology classes
+
+Classify every term you are about to write:
+
+- **A. Self-explanatory** — fine as-is: API, Database, E2E test, Integration test,
+  Requirement, Test Case, Repository, CI, Migration.
+- **B. Internally meaningful but externally opaque** — never in narrative unless
+  explicitly translated: Phase numbers, U-codes, ticket IDs, PR numbers.
+- **C. Essential proper nouns** — real capability/subsystem names stay: Traceability
+  Matrix, Specification Explorer, Design Coverage.
+
+Domain terms from the codebase (`captured set`, `UNCHANGED`, `reconstitute`,
+`Baseline`) sit between B and C: keep the term **with a few words of plain meaning
+on first use**. ✅ "On Baseline publish, the full set of relations frozen into that
+version is recorded…" instead of bare "captured set".
+
+## 3. Independent outcome rule
+
+Do not merge two Work Items merely because they share a day, a planning phase, a
+feature area, or adjacent commits. Example of genuinely independent outcomes that
+must stay separate: *Design Coverage* (observing requirement coverage status) vs
+*Specification Explorer* (managing Capability/Feature/Requirement hierarchy).
+
+Multiple views of one capability may be combined **only** when the narrative states
+the distinction: "two complementary views of traceability — the Graph for browsing
+relationship structure, the Matrix for reviewing and managing Requirement–Test Case
+links."
+
+## 4. Titles
+
+Outcome-oriented, short, independent of commit messages, no dates/times/file lists.
+
+✅ "Hierarchical artifact management implemented" · "Stored-state reads split from
+creation validation" · "Git execution in tests isolated from the main repository"
+❌ "Changes related to Explorer" · "Work on the API" · "Several fixes in guards" ·
+"40 files changed"
+
+## 5. Result-first ordering
+
+Open each item with what was built and what it enables; history (revert, prior
+attempt) comes after the result, never as the opening clause.
+
+❌ "After reverting an incomplete implementation, X was rebuilt from scratch…"
+✅ "X was implemented for managing hierarchical specifications. The final version
+follows removal of an earlier incomplete attempt…"
+
+## 6. Implementation-detail budget
+
+Each implementation name survives only if it improves understanding of the outcome.
+Accessibility patterns (`ARIA grid`) stay when accessibility is part of the outcome;
+helper names (`byCode`, `present`), hook names, and layer paths (`entities/trace`,
+`shared/lib`) usually add nothing for a CTO — describe the shared-read path effect
+instead ("coverage reads now come from one shared layer used by both tree and
+matrix").
+
+## 7. Weak system outcome check
+
+If a sentence reports an action with no answerable "so what?", either attach the
+evidence-backed rationale/outcome or drop the detail. ❌ "Icon library migrated to
+Tabler 3.31.0; lucide-react removed." ✅ + "…so navigation icons share one design
+system set" (only if evidence supports the intent).
+
+## 8. Reader Independence Test
+
+Cover the title + text of each Work Item and ask: would a CTO who knows nothing of
+internal phases, tickets, or planning labels understand what this work added or
+fixed in the system? If not → rewrite until yes.
