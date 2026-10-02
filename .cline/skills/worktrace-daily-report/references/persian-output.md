@@ -86,6 +86,18 @@ When unsure about a term's rendering, answer five questions in order:
 The answer is a language decision informed by context, not a substitution table.
 Do not build or rely on long prohibited-word lists; apply these five questions.
 
+**Meaning before translation for abstract verbs and concepts.** For terms like
+retire, frozen, captured, archive, publish: never map the English token to a fixed
+Persian word. First determine what operation or state the software actually means
+in this context (a link retired = deactivating an active relationship; a set
+captured at publish = recorded/persisted into the baseline), then express that
+meaning with established practitioner terminology or a natural functional
+description. The same English concept may legitimately render differently across
+domains (graph relationships vs release baselines vs document lifecycle). This
+procedure replaces any word-level mapping rule; no `retire -> X` or
+`frozen -> Y` table exists in this skill, and none should be inferred from
+examples. Naturalization must never alter the technical semantics of the claim.
+
 ## 4. Sentence-level naturalness (translationese tells)
 
 Remove at sentence level; keep the meaning, lose the tell ("keep every fact,
@@ -111,6 +123,25 @@ engineering evidence did not contain):
 - Excessive nominalization: stacking ezafe chains where a verb would move
   («انجام فرآیند مهاجرت تنظیمات» -> «تنظیمات migrate شد»).
 - Literal collocations that exist only as shadows of English idioms.
+- **English-shaped passive and relative-clause constructions.** Persian technical
+  prose tolerates passive voice when it is natural; the tell is a clause shaped by
+  English syntax — «… که از طریق X بازیابی می‌شود» calquing "which is retrieved
+  via X", stacked trailing relative clauses, or an agentless passive chosen where
+  a plain impersonal or active Persian construction is what an engineer would
+  write. Recast the clause shape; do not apply a blanket active-voice rule, and do
+  not alter the claim while recasting.
+- **Literal dictionary translation of abstract technical concepts.** Translating a
+  term by its general-language dictionary sense instead of its software meaning:
+  rendering link/relationship retirement with the human-retirement verb, "frozen"
+  state with the literal ice word, or similar formal equivalents that no engineer
+  in the field actually uses for that operation. The fix is procedural (section
+  3), never a fixed mapping table: determine the actual technical operation first,
+  then express that meaning with established practitioner terminology or a natural
+  functional description.
+- **Unnecessary Persian/English hybrids** — redundant pairing of a translated
+  form with the loanword it duplicates («از طریق انشعاب (fork)» style doubles)
+  where one of the two carries all the meaning; keep the one a practitioner would
+  use alone.
 - Empty evaluative adjectives (قدرتمند، چشمگیر، اساسی، باکیفیت) — already banned as
   unsupported claims; they are also style tells.
 - One idea per sentence; short sentences. Mixed sentence lengths are fine —
@@ -159,9 +190,11 @@ independent checks, then mechanics last:
    identifiers, commands, and error codes still byte-identical and recognizable? Has
    the same concept received multiple names? Resolve each finding with section 3.
 2. **Naturalness.** Does every sentence sound originally written in Persian? Check
-   for English-shaped syntax, calqued function words, bureaucratic verbs, AI-style
-   clusters, and uniform rhythm from section 4. The test question: would a senior
-   Iranian engineer sign this sentence?
+   for English-shaped syntax, English-shaped passive/relative-clause calques,
+   literal dictionary translations of abstract technical concepts, redundant
+   Persian/English hybrid doubles, calqued function words, bureaucratic verbs,
+   AI-style clusters, and uniform rhythm from section 4. The test question: would a
+   senior Iranian engineer sign this sentence?
 3. **Fidelity.** Re-read each sentence against its engineering claim: did wording
    changes strengthen, weaken, generalize, or scope-shift anything? Did the pass add
    a fact absent from the Git evidence? Wording is free to change; claims are frozen.

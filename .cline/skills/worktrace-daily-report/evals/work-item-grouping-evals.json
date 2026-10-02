@@ -1,0 +1,47 @@
+{
+  "skill_name": "worktrace-daily-report",
+  "notes": "Behavior evaluations for Work Item decomposition (SKILL.md Step 1 boundary review, validation.md AP-24/AP-25, acceptance test 19). Assertions check outcome-boundary reasoning, not domain vocabulary.",
+  "evals": [
+    {
+      "id": 1,
+      "target": "mixed engineering types that deliver independent outcomes must split",
+      "input": "Evidence set: one PR adds four traceability UI views, gates Settings behind MANAGE_PROJECT capability, and migrates the icon library to Tabler 3.31.0.",
+      "assertions": [
+        "Feature implementation, security/permission change, and dependency migration trigger the boundary review",
+        "They become separate Work Items because each delivers an independently meaningful outcome",
+        "The permission item states the functional access-control boundary without inventing severity or risk claims",
+        "No item merges the three merely because they share a PR/day/domain"
+      ]
+    },
+    {
+      "id": 2,
+      "target": "mixed engineering types that serve one outcome stay together",
+      "input": "Evidence set: commits add a domain model, an API endpoint, a UI view, and integration tests, all implementing one new Design Coverage capability.",
+      "assertions": [
+        "Layer/type differences (domain vs API vs UI vs tests) do not force a split",
+        "All commits form one Work Item because they reach one shared engineering outcome",
+        "The item reports the delivered capability once, not four layer-level activities"
+      ]
+    },
+    {
+      "id": 3,
+      "target": "over-broad heading fails scope proportionality",
+      "input": "Evidence set: four isolated fixes (git env cleanup in specs, ts-prune exit code, E2E menu wait, smoke payload field). Draft title: 'Test infrastructure and tooling stabilization achieved'.",
+      "assertions": [
+        "Acceptance test 19 flags the heading as broader than the evidence supports",
+        "The fix narrows the heading to the evidenced localized fixes (or splits items so headings match evidence)",
+        "No broad reliability/improvement claim is retained in the title or first sentence"
+      ]
+    },
+    {
+      "id": 4,
+      "target": "engineering type never forces either merge or split",
+      "input": "Case A: two unrelated bug fixes both in 'backend' type. Case B: a schema migration plus its data backfill plus its verification test, all different types but one outcome.",
+      "assertions": [
+        "Case A splits despite matching types (independent outcomes)",
+        "Case B stays merged despite mixed types (one outcome)",
+        "Reasoning cites independent outcome, not commit, PR, domain, layer, or type labels"
+      ]
+    }
+  ]
+}

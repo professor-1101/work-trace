@@ -111,7 +111,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 18 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 19 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -136,6 +136,16 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   menu fix + smoke payload fix are three Work Items even though all are
   "test-related". If your title reads "X **and** Y", suspect two outcomes that
   belong in separate items.
+- **Engineering-type difference triggers a boundary review.** When one candidate
+  item mixes different engineering types — security/permission change, tooling
+  change, dependency migration, documentation work, feature implementation — run
+  an explicit outcome-boundary review before keeping them together. Different
+  types should be split when they deliver independently meaningful outcomes.
+  Engineering type is a trigger for review, never an automatic boundary: do not
+  require separation merely because two changes carry different labels or types,
+  and do not merge them merely because the types match. The governing rule stays
+  `1 Work Item = 1 independent, meaningful engineering outcome`; never group or
+  split solely by commit, PR, domain, implementation layer, or engineering type.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
 - **Reverts**: do not require every revert to appear in the report. Mention a
@@ -229,6 +239,13 @@ writing any sentence that claims a *why*, an *impact*, or a
 - Title: short, outcome-oriented, no dates/times/file counts, independent of the
   commit message. Vague internal pointers such as "based on the new design" or
   "Phase 2.5" are banned from titles.
+- **Heading scope proportionality**: each Work Item heading must accurately
+  reflect the scope supported by its evidence and must not imply a broader
+  system-level change than the underlying evidence supports. Localized
+  test-script fixes do not earn a heading implying broad "test infrastructure
+  stabilization"; four isolated script/tool fixes get a title scoped to those
+  fixes. If the heading claims more than the item's sentences prove, narrow the
+  heading (or split the item).
 - **Result first**: open with what was built/changed and what it enables; put revert
   or history context after the result, not before it.
 - **Capability first**: present the capability or outcome before the implementation
@@ -279,11 +296,12 @@ defined there (terminology / naturalness / fidelity / mechanics).
 
 ### Step 5 — Self-check before delivering
 
-Run every Work Item through the 18 acceptance tests, both Definitions of Done
+Run every Work Item through the 19 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
-[references/approved-rules.md](references/approved-rules.md). Fix anything that
+[references/approved-rules.md](references/approved-rules.md), and test 19 checks
+each heading for scope proportionality against its evidence. Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
 claim — never invent support for it. **For Persian output, then run the separate
 language-only editorial pass in
@@ -302,7 +320,7 @@ engineering claim). Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 18 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 19 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
 - [references/persian-output.md](references/persian-output.md) — Persian report
@@ -316,6 +334,9 @@ engineering claim). Deliver only when every dimension passes.
 - `evals/persian-language-evals.json` — behavior evaluations for the Persian
   language layer; run when the language policy changes. Not loaded during normal
   report generation.
+- `evals/work-item-grouping-evals.json` — behavior evaluations for Work Item
+  decomposition and heading scope proportionality; run when grouping rules
+  change. Not loaded during normal report generation.
 
 ### Scope (neutrality)
 
@@ -874,6 +895,18 @@ When unsure about a term's rendering, answer five questions in order:
 The answer is a language decision informed by context, not a substitution table.
 Do not build or rely on long prohibited-word lists; apply these five questions.
 
+**Meaning before translation for abstract verbs and concepts.** For terms like
+retire, frozen, captured, archive, publish: never map the English token to a fixed
+Persian word. First determine what operation or state the software actually means
+in this context (a link retired = deactivating an active relationship; a set
+captured at publish = recorded/persisted into the baseline), then express that
+meaning with established practitioner terminology or a natural functional
+description. The same English concept may legitimately render differently across
+domains (graph relationships vs release baselines vs document lifecycle). This
+procedure replaces any word-level mapping rule; no `retire -> X` or
+`frozen -> Y` table exists in this skill, and none should be inferred from
+examples. Naturalization must never alter the technical semantics of the claim.
+
 ### 4. Sentence-level naturalness (translationese tells)
 
 Remove at sentence level; keep the meaning, lose the tell ("keep every fact,
@@ -899,6 +932,25 @@ engineering evidence did not contain):
 - Excessive nominalization: stacking ezafe chains where a verb would move
   («انجام فرآیند مهاجرت تنظیمات» -> «تنظیمات migrate شد»).
 - Literal collocations that exist only as shadows of English idioms.
+- **English-shaped passive and relative-clause constructions.** Persian technical
+  prose tolerates passive voice when it is natural; the tell is a clause shaped by
+  English syntax — «… که از طریق X بازیابی می‌شود» calquing "which is retrieved
+  via X", stacked trailing relative clauses, or an agentless passive chosen where
+  a plain impersonal or active Persian construction is what an engineer would
+  write. Recast the clause shape; do not apply a blanket active-voice rule, and do
+  not alter the claim while recasting.
+- **Literal dictionary translation of abstract technical concepts.** Translating a
+  term by its general-language dictionary sense instead of its software meaning:
+  rendering link/relationship retirement with the human-retirement verb, "frozen"
+  state with the literal ice word, or similar formal equivalents that no engineer
+  in the field actually uses for that operation. The fix is procedural (section
+  3), never a fixed mapping table: determine the actual technical operation first,
+  then express that meaning with established practitioner terminology or a natural
+  functional description.
+- **Unnecessary Persian/English hybrids** — redundant pairing of a translated
+  form with the loanword it duplicates («از طریق انشعاب (fork)» style doubles)
+  where one of the two carries all the meaning; keep the one a practitioner would
+  use alone.
 - Empty evaluative adjectives (قدرتمند، چشمگیر، اساسی، باکیفیت) — already banned as
   unsupported claims; they are also style tells.
 - One idea per sentence; short sentences. Mixed sentence lengths are fine —
@@ -947,9 +999,11 @@ independent checks, then mechanics last:
    identifiers, commands, and error codes still byte-identical and recognizable? Has
    the same concept received multiple names? Resolve each finding with section 3.
 2. **Naturalness.** Does every sentence sound originally written in Persian? Check
-   for English-shaped syntax, calqued function words, bureaucratic verbs, AI-style
-   clusters, and uniform rhythm from section 4. The test question: would a senior
-   Iranian engineer sign this sentence?
+   for English-shaped syntax, English-shaped passive/relative-clause calques,
+   literal dictionary translations of abstract technical concepts, redundant
+   Persian/English hybrid doubles, calqued function words, bureaucratic verbs,
+   AI-style clusters, and uniform rhythm from section 4. The test question: would a
+   senior Iranian engineer sign this sentence?
 3. **Fidelity.** Re-read each sentence against its engineering claim: did wording
    changes strengthen, weaken, generalize, or scope-shift anything? Did the pass add
    a fact absent from the Git evidence? Wording is free to change; claims are frozen.
@@ -1142,7 +1196,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-### Final acceptance tests (18; run per Work Item)
+### Final acceptance tests (19; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -1164,6 +1218,7 @@ pairs two different snapshots is rejected at creation time."
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 | 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
 | 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, an invented coinage no field uses, transliterated or altered identifiers/commands/error codes inside protected spans, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، AI-style clusters, or inconsistent rendering of one concept. Run the four-check language-only editorial pass (terminology / naturalness / fidelity / mechanics) in persian-output.md; this test must never alter an engineering claim |
+| 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
 
 ### Reject patterns (distilled)
 
@@ -1180,7 +1235,7 @@ pairs two different snapshots is rejected at creation time."
 11. Buzzword padding.
 12. Planning terminology inside narrative; vague pointers like "new design".
 
-### Anti-pattern catalog (AP-1..16, recurring failure shapes)
+### Anti-pattern catalog (AP-1..25, recurring failure shapes)
 
 - **AP-1 Activity-only item** — counts/diffs instead of meaning. Fix: Level 2+.
 - **AP-2 Invented why** — motivation without evidence. Fix: start from work itself.
@@ -1239,6 +1294,16 @@ pairs two different snapshots is rejected at creation time."
 - **AP-23 Empty/truncated output** — empty headings, empty Work Items, dangling
   sections, truncated fragments, or placeholder content in the final report. Fix:
   delete the artifact or omit the unevidenced Work Item entirely.
+- **AP-24 Engineering-type bundling** — merging security/permission changes,
+  tooling changes, dependency migrations, documentation work, or feature
+  implementation into one item because they share a day, PR, phase, or domain.
+  Fix: engineering-type difference triggers an outcome-boundary review; split
+  when outcomes are independently meaningful, keep together only when they truly
+  deliver one outcome. Type labels never force either direction.
+- **AP-25 Over-broad heading** — a Work Item heading claiming system-wide scope
+  ("test infrastructure stabilization", "architecture overhaul") that the item's
+  evidence does not support. Fix: retitle to the evidenced scope or split the
+  item (see acceptance test 19).
 
 ### PASS/FAIL scorecard (final gate)
 
@@ -1250,7 +1315,8 @@ technical-accuracy · grouping-quality · no-business-hallucination · no-corpor
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
 (RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
-persian-naturalness (Persian output only; language-only pass per persian-output.md).
+heading-scope-proportionality · persian-naturalness (Persian output only; language-only
+pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.
 For Persian reports, the engineering checks above run first; the language-only

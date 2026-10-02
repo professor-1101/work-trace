@@ -104,6 +104,38 @@
         "'v3.31.0' digits remain Latin (protected span).",
         "'مي‌باشد' is flagged as officialese (judgment layer) and rewritten to 'است'/'هستند' -- the mechanics layer alone must not silently reword it."
       ]
+    },
+    {
+      "id": 11,
+      "target": "English-shaped passive/relative-clause calque detected and recast",
+      "input": "Persian draft sentence: 'اطلاعات وضعیت منتشرشده از طریق ReleasedStateReader و SnapshotReader بازیابی می‌شود.' (calque of 'which is retrieved via ...'). Fix per persian-output.md section 4.",
+      "assertions": [
+        "The rewrite removes the English-shaped relative/passive clause shape rather than keeping a literal 'که ... می‌شود' calque",
+        "No blanket active-voice rule is applied; natural Persian passive remains acceptable",
+        "ReleasedStateReader and SnapshotReader stay byte-identical in Latin script (protected identifiers)",
+        "The engineering claim (retrieved via those two readers) is unchanged in scope and strength"
+      ]
+    },
+    {
+      "id": 12,
+      "target": "Literal dictionary translation of abstract technical concept replaced by meaning-first rendering",
+      "input": "Persian draft uses 'بازنشسته کردن روابط' for retiring matrix links and 'منجمدشده' for frozen/captured baseline relationships. Policy requires meaning-before-translation, not word mappings.",
+      "assertions": [
+        "Each term is resolved by first identifying the actual operation/state (deactivating an active relationship; recorded/persisted into the baseline), then choosing practitioner wording or a functional description",
+        "No fixed retire->X or frozen->Y mapping table is applied or implied",
+        "Chosen renderings are consistent across the report for each concept",
+        "Technical semantics are preserved: retirement still means reversible deactivation, not deletion, unless evidence says otherwise"
+      ]
+    },
+    {
+      "id": 13,
+      "target": "Naturalization without semantic drift",
+      "input": "Sentence: 'فرم افزودن لینک فقط tripleهای مجاز را ارائه می‌کند و ایجاد روابط نامعتبر را در UI مسدود می‌کند.' A smoother phrasing drops 'در UI' and becomes 'از ایجاد روابط نامعتبر جلوگیری می‌کند'.",
+      "assertions": [
+        "The editorial pass rejects the smoother version because it widens the claim beyond evidence",
+        "The scope qualifier 'در UI' is retained even though the sentence flows shorter without it",
+        "No new fact, evaluation, or system-wide guarantee is introduced during rewording"
+      ]
     }
   ]
 }

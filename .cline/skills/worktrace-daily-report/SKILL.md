@@ -68,7 +68,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 18 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 19 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -93,6 +93,16 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   menu fix + smoke payload fix are three Work Items even though all are
   "test-related". If your title reads "X **and** Y", suspect two outcomes that
   belong in separate items.
+- **Engineering-type difference triggers a boundary review.** When one candidate
+  item mixes different engineering types — security/permission change, tooling
+  change, dependency migration, documentation work, feature implementation — run
+  an explicit outcome-boundary review before keeping them together. Different
+  types should be split when they deliver independently meaningful outcomes.
+  Engineering type is a trigger for review, never an automatic boundary: do not
+  require separation merely because two changes carry different labels or types,
+  and do not merge them merely because the types match. The governing rule stays
+  `1 Work Item = 1 independent, meaningful engineering outcome`; never group or
+  split solely by commit, PR, domain, implementation layer, or engineering type.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
 - **Reverts**: do not require every revert to appear in the report. Mention a
@@ -186,6 +196,13 @@ writing any sentence that claims a *why*, an *impact*, or a
 - Title: short, outcome-oriented, no dates/times/file counts, independent of the
   commit message. Vague internal pointers such as "based on the new design" or
   "Phase 2.5" are banned from titles.
+- **Heading scope proportionality**: each Work Item heading must accurately
+  reflect the scope supported by its evidence and must not imply a broader
+  system-level change than the underlying evidence supports. Localized
+  test-script fixes do not earn a heading implying broad "test infrastructure
+  stabilization"; four isolated script/tool fixes get a title scoped to those
+  fixes. If the heading claims more than the item's sentences prove, narrow the
+  heading (or split the item).
 - **Result first**: open with what was built/changed and what it enables; put revert
   or history context after the result, not before it.
 - **Capability first**: present the capability or outcome before the implementation
@@ -236,11 +253,12 @@ defined there (terminology / naturalness / fidelity / mechanics).
 
 ## Step 5 — Self-check before delivering
 
-Run every Work Item through the 18 acceptance tests, both Definitions of Done
+Run every Work Item through the 19 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
-[references/approved-rules.md](references/approved-rules.md). Fix anything that
+[references/approved-rules.md](references/approved-rules.md), and test 19 checks
+each heading for scope proportionality against its evidence. Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
 claim — never invent support for it. **For Persian output, then run the separate
 language-only editorial pass in
@@ -259,7 +277,7 @@ engineering claim). Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 18 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 19 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
 - [references/persian-output.md](references/persian-output.md) — Persian report
@@ -273,6 +291,9 @@ engineering claim). Deliver only when every dimension passes.
 - `evals/persian-language-evals.json` — behavior evaluations for the Persian
   language layer; run when the language policy changes. Not loaded during normal
   report generation.
+- `evals/work-item-grouping-evals.json` — behavior evaluations for Work Item
+  decomposition and heading scope proportionality; run when grouping rules
+  change. Not loaded during normal report generation.
 
 ## Scope (neutrality)
 
