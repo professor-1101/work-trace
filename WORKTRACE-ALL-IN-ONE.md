@@ -138,12 +138,35 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   belong in separate items.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
-- **Reverts**: interpret with the following history. If A (incomplete) -> B (revert) ->
-  C (final), report C as the accomplishment. Never present reverted or incomplete
-  work as completed. A revert is its own Work Item only if it had its own
-  significant outcome (e.g., keeping an unhealthy state out of the mainline). Do
-  not invent root causes, lessons learned, or architectural conclusions about the
-  failed attempt unless the evidence states them.
+- **Reverts**: do not require every revert to appear in the report. Mention a
+  revert only when it materially explains the final outcome, the current state, a
+  meaningful limitation, or why the resulting implementation differs from an
+  earlier attempt; a revert existing in Git history is not by itself report-worthy.
+  When mentioned, interpret it with the following history: if A (incomplete) -> B
+  (revert) -> C (final), report C as the accomplishment and never present reverted
+  or incomplete work as completed. A revert is its own Work Item only if it had
+  its own significant outcome (e.g., keeping an unhealthy state out of the
+  mainline). Never invent the operational failure mechanism, regression, root
+  cause, or reason for a revert when repository evidence does not establish it —
+  if the repository only proves that something was reverted, report only that
+  supported fact.
+- **Work in progress / incomplete work**: never represent incomplete work as
+  completed delivery. When ongoing work is materially relevant, anchor its status
+  to concrete technical evidence (completed schema or migration work, implemented
+  API behavior, passing relevant tests, completed integration pieces, verified
+  repository state). Do not use unsupported percentage-complete claims.
+- **Abandoned prototypes / spikes**: do not automatically frame abandoned,
+  reverted, or failed prototypes as "risk reduction". Report the actual
+  evidence-supported result: what was attempted, what limitation or finding was
+  established, what state the repository ended in. Describe the work as risk
+  reduction only when the evidence genuinely supports that interpretation; do not
+  fabricate a tested hypothesis, architectural direction, or risk outcome merely
+  because a prototype was discarded.
+- **No empty or truncated output**: the final report must never contain empty
+  headings, empty Work Items, dangling sections, obviously truncated fragments, or
+  unsupported placeholder content. If an extracted Work Item has no defensible
+  engineering outcome or sufficient evidence, omit it entirely. This is an output
+  quality requirement, not a mandate for any specific validator technology.
 
 ### Approved rule set (canonical source of truth)
 
@@ -594,11 +617,27 @@ execution against a fresh database reaches `404 USER_NOT_FOUND` because the crea
 identities have no accounts; continuing this flow requires creating matching
 accounts."
 
+Never represent incomplete work as completed delivery. When ongoing work is
+materially relevant, anchor its status to concrete technical evidence — completed
+schema or migration work, implemented API behavior, passing relevant tests,
+completed integration pieces, verified repository state — not to unsupported
+percentage-complete claims ("70% done", "mostly finished").
+
 ### 10. Risk / limitation / follow-up discipline
 
 - Do not hide a material limitation just to make the text look positive.
 - Do not manufacture risk: complexity alone is not risk; few tests alone are not
   high risk. Only evidence-driven statements about risk are allowed.
+- **Evidence boundary for reverts, failures, limitations, validation results, and
+  status**: the strength of the claim must not exceed the available repository
+  evidence. Do not infer root cause, failure mechanism, risk reduction, production
+  readiness, stability, or completeness unless the evidence supports the claim.
+  Preserve the actual scope of the evidence: if evidence only shows that a UI
+  interaction blocks an invalid relationship, do not generalize that into a
+  system-wide or database-level integrity guarantee.
+- Abandoned prototypes/spikes are reported as what was attempted, what finding or
+  limitation was established, and the final repository state — not automatically
+  as "risk reduction" unless the evidence genuinely supports that framing.
 
 ### 11. Technical detail policy
 
@@ -945,11 +984,30 @@ genuinely necessary and meaningful to the intended reader; otherwise translate i
 meaning into system-level language or omit it. These may live in metadata/audit
 trails — not in the story.
 
-Rule — for any phrase that requires repo knowledge to understand, do exactly one of:
+Rule — filter by **Reader Value and Technical Materiality**, not by blanket
+translation or blanket omission. For every internal identifier or technical
+detail, ask: does it help the target reader understand the engineering outcome;
+does it materially explain system behavior, an important architecture or
+integration point, a security/authorization boundary, data integrity, backward
+compatibility, a public contract, or validation/operational status? If yes,
+preserve the useful technical meaning and retain the identifier itself when
+necessary for precision or recognition. If no, abstract or omit it. Technical
+does not mean noise, and an internal identifier is not automatically useless.
+
+For any phrase that requires repo knowledge to understand, do exactly one of:
 
 1. delete it;
 2. translate it into system-level meaning;
-3. keep it only if self-explanatory to the reader.
+3. keep it (identifier included) when it carries reader value or technical
+   materiality — e.g., self-explanatory to the reader, or necessary for
+   precision/recognition.
+
+Do not translate or preserve identifiers mechanically; decide per case. Example:
+an internal method such as `ChangeSetArtifactState.create` may be omitted while
+the underlying engineering rule is retained if the rule is meaningful to the
+reader; a capability such as `MANAGE_PROJECT` may be translated into its
+functional meaning when the security boundary matters, rather than exposing the
+internal flag name.
 
 BAD: "Traceability matrix and graph were implemented based on Phase 2.5."
 GOOD: "Graph and matrix views were implemented for observing and managing
@@ -1156,9 +1214,12 @@ pairs two different snapshots is rejected at creation time."
 - **AP-17 Activity-metric reporting** (RULE-01) — hours logged, commit counts, file
   counts, or line churn presented without outcome context. Fix: report the verified
   technical state change; reframe or omit activity volume.
-- **AP-18 Untranslated internal identifiers** (RULE-02) — ticket keys, class/method
-  names, or capability flags left raw where they add no reader meaning. Fix:
-  translate to domain purpose or omit; retain only when genuinely informative.
+- **AP-18 Blanket identifier handling** (RULE-02) — either leaking ticket keys,
+  class/method names, and planning labels into narrative, or mechanically
+  translating/omitting every internal identifier regardless of reader value. Fix:
+  filter by Reader Value and Technical Materiality; retain the identifier when it
+  is necessary for precision or recognition, translate to functional meaning when
+  the underlying rule matters, omit otherwise.
 - **AP-19 Diff-mechanics-only item** (RULE-03) — file/function-level changes with no
   system-level meaning stated even though evidence supports one. Fix: answer what
   became possible/observable/enforceable/testable; if unsupported, keep the
@@ -1166,6 +1227,18 @@ pairs two different snapshots is rejected at creation time."
 - **AP-20 Detail misselection** (RULE-04) — contract/security/validation-relevant
   detail dropped, or routine syntax edits, minor styling tweaks, and sub-version
   bumps reported as substance. Fix: keep material detail in concise form; cut noise.
+- **AP-21 Invented revert mechanism** — stating a root cause, regression, failure
+  mechanism, or reason for a revert/spike abandonment that repository evidence does
+  not establish. Fix: report only the supported fact (e.g., "the earlier
+  implementation was reverted"), or omit the revert when it does not materially
+  explain outcome, state, limitation, or divergence.
+- **AP-22 Unsupported progress claim** — percentage-complete statements ("70% done")
+  or framing discarded prototypes as "risk reduction" without evidence. Fix: anchor
+  status to concrete technical evidence (schema/migration completed, API behavior
+  implemented, tests passing, integration pieces done, verified repo state).
+- **AP-23 Empty/truncated output** — empty headings, empty Work Items, dangling
+  sections, truncated fragments, or placeholder content in the final report. Fix:
+  delete the artifact or omit the unevidenced Work Item entirely.
 
 ### PASS/FAIL scorecard (final gate)
 
@@ -1176,8 +1249,8 @@ evidence-fidelity · greenfield-handling · revert-handling · limitation-visibi
 technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
-(RULE-01..RULE-04 incl. exceptions) · persian-naturalness (Persian output only;
-language-only pass per persian-output.md).
+(RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
+persian-naturalness (Persian output only; language-only pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.
 For Persian reports, the engineering checks above run first; the language-only

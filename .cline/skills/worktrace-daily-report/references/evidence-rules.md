@@ -131,11 +131,27 @@ execution against a fresh database reaches `404 USER_NOT_FOUND` because the crea
 identities have no accounts; continuing this flow requires creating matching
 accounts."
 
+Never represent incomplete work as completed delivery. When ongoing work is
+materially relevant, anchor its status to concrete technical evidence — completed
+schema or migration work, implemented API behavior, passing relevant tests,
+completed integration pieces, verified repository state — not to unsupported
+percentage-complete claims ("70% done", "mostly finished").
+
 ## 10. Risk / limitation / follow-up discipline
 
 - Do not hide a material limitation just to make the text look positive.
 - Do not manufacture risk: complexity alone is not risk; few tests alone are not
   high risk. Only evidence-driven statements about risk are allowed.
+- **Evidence boundary for reverts, failures, limitations, validation results, and
+  status**: the strength of the claim must not exceed the available repository
+  evidence. Do not infer root cause, failure mechanism, risk reduction, production
+  readiness, stability, or completeness unless the evidence supports the claim.
+  Preserve the actual scope of the evidence: if evidence only shows that a UI
+  interaction blocks an invalid relationship, do not generalize that into a
+  system-wide or database-level integrity guarantee.
+- Abandoned prototypes/spikes are reported as what was attempted, what finding or
+  limitation was established, and the final repository state — not automatically
+  as "risk reduction" unless the evidence genuinely supports that framing.
 
 ## 11. Technical detail policy
 

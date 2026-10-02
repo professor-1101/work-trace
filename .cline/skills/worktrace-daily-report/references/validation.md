@@ -116,9 +116,12 @@ pairs two different snapshots is rejected at creation time."
 - **AP-17 Activity-metric reporting** (RULE-01) — hours logged, commit counts, file
   counts, or line churn presented without outcome context. Fix: report the verified
   technical state change; reframe or omit activity volume.
-- **AP-18 Untranslated internal identifiers** (RULE-02) — ticket keys, class/method
-  names, or capability flags left raw where they add no reader meaning. Fix:
-  translate to domain purpose or omit; retain only when genuinely informative.
+- **AP-18 Blanket identifier handling** (RULE-02) — either leaking ticket keys,
+  class/method names, and planning labels into narrative, or mechanically
+  translating/omitting every internal identifier regardless of reader value. Fix:
+  filter by Reader Value and Technical Materiality; retain the identifier when it
+  is necessary for precision or recognition, translate to functional meaning when
+  the underlying rule matters, omit otherwise.
 - **AP-19 Diff-mechanics-only item** (RULE-03) — file/function-level changes with no
   system-level meaning stated even though evidence supports one. Fix: answer what
   became possible/observable/enforceable/testable; if unsupported, keep the
@@ -126,6 +129,18 @@ pairs two different snapshots is rejected at creation time."
 - **AP-20 Detail misselection** (RULE-04) — contract/security/validation-relevant
   detail dropped, or routine syntax edits, minor styling tweaks, and sub-version
   bumps reported as substance. Fix: keep material detail in concise form; cut noise.
+- **AP-21 Invented revert mechanism** — stating a root cause, regression, failure
+  mechanism, or reason for a revert/spike abandonment that repository evidence does
+  not establish. Fix: report only the supported fact (e.g., "the earlier
+  implementation was reverted"), or omit the revert when it does not materially
+  explain outcome, state, limitation, or divergence.
+- **AP-22 Unsupported progress claim** — percentage-complete statements ("70% done")
+  or framing discarded prototypes as "risk reduction" without evidence. Fix: anchor
+  status to concrete technical evidence (schema/migration completed, API behavior
+  implemented, tests passing, integration pieces done, verified repo state).
+- **AP-23 Empty/truncated output** — empty headings, empty Work Items, dangling
+  sections, truncated fragments, or placeholder content in the final report. Fix:
+  delete the artifact or omit the unevidenced Work Item entirely.
 
 ## PASS/FAIL scorecard (final gate)
 
@@ -136,8 +151,8 @@ evidence-fidelity · greenfield-handling · revert-handling · limitation-visibi
 technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
-(RULE-01..RULE-04 incl. exceptions) · persian-naturalness (Persian output only;
-language-only pass per persian-output.md).
+(RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
+persian-naturalness (Persian output only; language-only pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.
 For Persian reports, the engineering checks above run first; the language-only

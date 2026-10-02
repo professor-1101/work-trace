@@ -16,11 +16,30 @@ genuinely necessary and meaningful to the intended reader; otherwise translate i
 meaning into system-level language or omit it. These may live in metadata/audit
 trails — not in the story.
 
-Rule — for any phrase that requires repo knowledge to understand, do exactly one of:
+Rule — filter by **Reader Value and Technical Materiality**, not by blanket
+translation or blanket omission. For every internal identifier or technical
+detail, ask: does it help the target reader understand the engineering outcome;
+does it materially explain system behavior, an important architecture or
+integration point, a security/authorization boundary, data integrity, backward
+compatibility, a public contract, or validation/operational status? If yes,
+preserve the useful technical meaning and retain the identifier itself when
+necessary for precision or recognition. If no, abstract or omit it. Technical
+does not mean noise, and an internal identifier is not automatically useless.
+
+For any phrase that requires repo knowledge to understand, do exactly one of:
 
 1. delete it;
 2. translate it into system-level meaning;
-3. keep it only if self-explanatory to the reader.
+3. keep it (identifier included) when it carries reader value or technical
+   materiality — e.g., self-explanatory to the reader, or necessary for
+   precision/recognition.
+
+Do not translate or preserve identifiers mechanically; decide per case. Example:
+an internal method such as `ChangeSetArtifactState.create` may be omitted while
+the underlying engineering rule is retained if the rule is meaningful to the
+reader; a capability such as `MANAGE_PROJECT` may be translated into its
+functional meaning when the security boundary matters, rather than exposing the
+internal flag name.
 
 BAD: "Traceability matrix and graph were implemented based on Phase 2.5."
 GOOD: "Graph and matrix views were implemented for observing and managing

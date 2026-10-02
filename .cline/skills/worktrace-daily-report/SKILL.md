@@ -95,12 +95,35 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   belong in separate items.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
-- **Reverts**: interpret with the following history. If A (incomplete) -> B (revert) ->
-  C (final), report C as the accomplishment. Never present reverted or incomplete
-  work as completed. A revert is its own Work Item only if it had its own
-  significant outcome (e.g., keeping an unhealthy state out of the mainline). Do
-  not invent root causes, lessons learned, or architectural conclusions about the
-  failed attempt unless the evidence states them.
+- **Reverts**: do not require every revert to appear in the report. Mention a
+  revert only when it materially explains the final outcome, the current state, a
+  meaningful limitation, or why the resulting implementation differs from an
+  earlier attempt; a revert existing in Git history is not by itself report-worthy.
+  When mentioned, interpret it with the following history: if A (incomplete) -> B
+  (revert) -> C (final), report C as the accomplishment and never present reverted
+  or incomplete work as completed. A revert is its own Work Item only if it had
+  its own significant outcome (e.g., keeping an unhealthy state out of the
+  mainline). Never invent the operational failure mechanism, regression, root
+  cause, or reason for a revert when repository evidence does not establish it —
+  if the repository only proves that something was reverted, report only that
+  supported fact.
+- **Work in progress / incomplete work**: never represent incomplete work as
+  completed delivery. When ongoing work is materially relevant, anchor its status
+  to concrete technical evidence (completed schema or migration work, implemented
+  API behavior, passing relevant tests, completed integration pieces, verified
+  repository state). Do not use unsupported percentage-complete claims.
+- **Abandoned prototypes / spikes**: do not automatically frame abandoned,
+  reverted, or failed prototypes as "risk reduction". Report the actual
+  evidence-supported result: what was attempted, what limitation or finding was
+  established, what state the repository ended in. Describe the work as risk
+  reduction only when the evidence genuinely supports that interpretation; do not
+  fabricate a tested hypothesis, architectural direction, or risk outcome merely
+  because a prototype was discarded.
+- **No empty or truncated output**: the final report must never contain empty
+  headings, empty Work Items, dangling sections, obviously truncated fragments, or
+  unsupported placeholder content. If an extracted Work Item has no defensible
+  engineering outcome or sufficient evidence, omit it entirely. This is an output
+  quality requirement, not a mandate for any specific validator technology.
 
 ## Approved rule set (canonical source of truth)
 
