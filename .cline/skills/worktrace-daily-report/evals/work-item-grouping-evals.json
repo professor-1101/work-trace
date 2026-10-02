@@ -63,6 +63,39 @@
         "If the shell-wide icon-system change is independently meaningful to the reader it becomes its own Work Item",
         "Splitting or keeping is decided by outcome independence, never by implementation type alone"
       ]
+    },
+    {
+      "id": 7,
+      "target": "final split/merge re-audit catches a bundled item before report output",
+      "input": "Drafted report has one Work Item titled 'Explorer tree and Settings access control' whose narrative covers a hierarchy-management feature plus an unrelated permission gating change; grouping was decided early and not revisited.",
+      "assertions": [
+        "Acceptance test 21 runs the final split/merge re-audit before report output",
+        "The bundled item is split into two independently meaningful outcomes during the re-audit",
+        "Headings are retitled so each matches its own evidenced scope",
+        "Tests 14 and 19 are re-run on the corrected items"
+      ]
+    },
+    {
+      "id": 8,
+      "target": "re-audit merges duplicate reporting of one outcome without collapsing implementation steps",
+      "input": "Drafted report contains two items, 'Added matrix view' and 'Matrix cell selection supports linking', both describing parts of one Traceability Matrix outcome delivered across several commits.",
+      "assertions": [
+        "The re-audit detects the same outcome reported twice and merges the items",
+        "Multiple implementation steps of the one outcome stay grouped rather than being split further",
+        "Shared domain alone is never used as grounds for merging unrelated items in the same pass",
+        "The governing rule cited is 1 Work Item = 1 independent, meaningful engineering outcome"
+      ]
+    },
+    {
+      "id": 9,
+      "target": "mechanism-led item rebalanced to outcome-first placement",
+      "input": "Draft item opens and mostly reads 'ELK layered layout with orthogonal routing was implemented; nodes positioned via ELK; edge routing configured in ELK options' for a graph-view feature whose outcome is readable large graphs.",
+      "assertions": [
+        "The item is recognized as mechanism-dominant where the capability would inform the reader better (test 16)",
+        "Rewrite leads with the outcome (readable layout for large graphs) and keeps ELK detail after it",
+        "The mechanism is retained because it materially explains the layout behavior, not deleted",
+        "No claim about quality/readability is added beyond what the evidence supports"
+      ]
     }
   ]
 }

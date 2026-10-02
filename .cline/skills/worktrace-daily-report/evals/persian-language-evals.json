@@ -166,6 +166,50 @@
         "Rewritten to the evidenced behavior: stored states remain readable because the read path skips the new creation validation",
         "No absolute completeness claim remains; scope preserved"
       ]
+    },
+    {
+      "id": 17,
+      "target": "formulaic capability-announcement opener replaced by natural outcome framing",
+      "input": "Persian draft item opens with 'قابلیت Design Coverage پیاده‌سازی شد.' after a heading saying the same. Evidence shows coverage status is now computed per Requirement from linked Test Cases.",
+      "assertions": [
+        "The pass flags the opener as a formula that restates the heading and adds no information",
+        "The rewrite states what now works or became possible (coverage visible/computed per Requirement), evidence-bounded",
+        "No new fixed sentence template is adopted in place of the formula; ordinary direct delivery wording stays acceptable when it carries the evidence",
+        "The engineering claim is unchanged in scope and strength"
+      ]
+    },
+    {
+      "id": 18,
+      "target": "repetitive adjacent-sentence structure varied without forced synonym cycling",
+      "input": "Three adjacent Persian sentences describing similar fixes all open with the same pattern ('… اصلاح شد', '… اصلاح شد', '… اصلاح شد') with identical clause shape and length.",
+      "assertions": [
+        "The uniform opening/clause-shape cadence is detected as an AI-style cluster tell",
+        "Sentences are reshaped according to what each one actually says (different openings, lengths, focus)",
+        "No synonym is swapped in merely for variety; each technical concept keeps its consistent rendering",
+        "No engineering claim changes while sentences are reshaped"
+      ]
+    },
+    {
+      "id": 19,
+      "target": "AI-tell review judged at pattern level, not word level",
+      "input": "Persian draft uses 'همچنین' once in three pages and 'علاوه بر این' zero times; another paragraph opens four consecutive sentences with piled connectors.",
+      "assertions": [
+        "The single ordinary occurrence is left untouched — no word-level blacklist firing",
+        "The consecutive connector cluster is flagged and reduced",
+        "Reasoning cites recurrence/clustering as the signal, not the mere presence of a listed word",
+        "Bureaucratic-phrasing and calque checks are likewise applied as recurring pattern signals, not banned-word lists"
+      ]
+    },
+    {
+      "id": 20,
+      "target": "evidence-rich limitation preserved verbatim through naturalization",
+      "input": "Draft limitation: 'اجرای کامل روی دیتابیس تازه به خطای 404 USER_NOT_FOUND می‌رسد چون هویت‌های ساخته‌شده اکانت ندارند.' A smoother rewrite proposes 'مشکلاتی در اجرای کامل باقی است'.",
+      "assertions": [
+        "The smoother vague version is rejected because it weakens an evidence-rich limitation",
+        "404 USER_NOT_FOUND stays byte-identical in Latin script inside the protected span",
+        "The observed cause-as-evidence (created identities have no accounts) is retained without extending it into an unobserved root cause",
+        "Wording may be reshaped naturally, but claim strength neither exceeds nor falls below the evidence"
+      ]
     }
   ]
 }

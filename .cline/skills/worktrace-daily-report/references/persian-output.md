@@ -89,11 +89,15 @@ Do not build or rely on long prohibited-word lists; apply these five questions.
 **Meaning before translation for abstract verbs and concepts.** For terms like
 retire, frozen, captured, archive, publish: never map the English token to a fixed
 Persian word. First determine what operation or state the software actually means
-in this context (a link retired = deactivating an active relationship; a set
-captured at publish = recorded/persisted into the baseline), then express that
+in this context — resolve the term's real domain meaning from the code's behavior
+before rendering it (a link retired = deactivating an active relationship; a set
+captured at publish = recorded/persisted into the baseline) — then express that
 meaning with established practitioner terminology or a natural functional
-description. The same English concept may legitimately render differently across
-domains (graph relationships vs release baselines vs document lifecycle). This
+description. Resolve ambiguity by evidence, never by picking a favorite Persian
+word: if retire/delete/archive/deactivate cannot be told apart from the evidence,
+keep the source term rather than guessing a rendering. The same English concept may
+legitimately render differently across domains (graph relationships vs release
+baselines vs document lifecycle). This
 procedure replaces any word-level mapping rule; no `retire -> X` or
 `frozen -> Y` table exists in this skill, and none should be inferred from
 examples. **Lifecycle operations stay semantically distinct.** retire, delete,
@@ -125,7 +129,21 @@ engineering evidence did not contain):
   piled connectors (همچنین / علاوه بر این / از سوی دیگر opening consecutive
   sentences), «نه تنها … بلکه …» recurring, rule-of-three adjective lists, uniform
   sentence length, closing-summary paragraphs, announcement fillers (لازم به ذکر
-  است، شایان ذکر است، در نهایت).
+  است، شایان ذکر است، در نهایت). Treat these as recurring pattern-level signals —
+  one ordinary «همچنین» is not a violation; the tell is repetition and clustering.
+  Do not compile them into word-level blacklists: remove the construction's grip on
+  the paragraph, not a specific word from the language.
+- Formulaic outcome announcements in Persian reports — «قابلیت X پیاده‌سازی شد» style
+  openings that declare implementation without saying what now works or became
+  possible. They duplicate the heading and read as machine output; open with the
+  natural result instead. This is a framing reflex to catch, not a banned phrase
+  and not a replacement sentence template.
+- Repetitive adjacent-sentence shape: several nearby sentences describing similar
+  changes all starting the same way («… اضافه شد», «… اصلاح شد»), mirroring one
+  clause structure, or running to identical length. Reshape so parallel content
+  reads with varied rhythm; vary because the sentences genuinely differ, never by
+  inserting synonyms for mere variety (see section 2 on consistency) and never
+  while touching the claim itself.
 - Excessive nominalization: stacking ezafe chains where a verb would move
   («انجام فرآیند مهاجرت تنظیمات» -> «تنظیمات migrate شد»).
 - Literal collocations that exist only as shadows of English idioms.
@@ -184,6 +202,12 @@ Naturalness is bounded by fidelity:
 - Keep every scope qualifier exactly (در سطح UI، در زمان creation) even when a
   shorter phrasing would flow better. A smoother sentence that widens a claim is
   a failed sentence.
+- **Preserve concrete observed evidence.** Error codes, failed checks, and rejected
+  inputs captured in the repository evidence (`404 USER_NOT_FOUND`, exit codes) are
+  part of the limitation's content: keep them verbatim in Latin script instead of
+  smoothing them into vague wording («مشکلاتی باقی است»). Naturalness never justifies
+  weakening an evidence-rich limitation; it also never licenses extending the
+  recorded signal into an unobserved cause or a broader conclusion.
 - Do not convert behavior descriptions into evaluations while smoothing them
   («مسدود می‌کند» must not become «امن می‌کند»).
 - Technical accuracy outranks elegance: a capability check is access-control, not
@@ -208,8 +232,11 @@ independent checks, then mechanics last:
    literal dictionary translations of abstract technical concepts, flattened
    lifecycle distinctions, English-shaped names/calls calques, redundant
    Persian/English hybrid doubles, calqued function words, bureaucratic verbs,
-   AI-style clusters, and uniform rhythm from section 4. The test question: would a
-   senior Iranian engineer sign this sentence?
+   AI-style clusters, formulaic «قابلیت X پیاده‌سازی شد» openings, and uniform rhythm
+   or repetitive adjacent-sentence shape from section 4. Judge these as recurring
+   pattern-level signals, not word-level blacklists: a single ordinary occurrence is
+   fine, the tell is repetition and clustering. The test question: would a senior
+   Iranian engineer sign this sentence?
 3. **Fidelity.** Re-read each sentence against its engineering claim: did wording
    changes strengthen, weaken, generalize, or scope-shift anything? Did the pass add
    a fact absent from the Git evidence? Wording is free to change; claims are frozen.
