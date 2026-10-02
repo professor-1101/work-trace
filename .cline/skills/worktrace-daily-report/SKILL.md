@@ -68,7 +68,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 17 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 18 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -184,26 +184,42 @@ internal-reference rule, and the Reader Independence Test.
 
 ## Step 4 — Language and tone (skill is English; report may be Persian)
 
-The report language follows the user's request. For Persian reports: natural Persian
-sentence structure, standard technical terms kept in English, no artificial
-translations, no first person. Preferred verbs: implemented, redesigned, isolated,
-enforced, validated, covered, migrated, split, hardened, removed (and their natural
-Persian equivalents). Weak verbs to avoid: "worked on X", "some changes were made",
-"items were reviewed", "effort was made". Corporate/marketing patterns are default
-failures: "in line with advancing…", "significant improvement", "effective step
-toward…", "powerful solution", "successfully…". Sound like an experienced engineer,
-not marketing, HR, or a changelog. No decorative emojis anywhere — not in the Skill
-files, references, examples, headings, or metadata; use plain Markdown only.
+The report language follows the user's request. Tone rules apply in any language:
+sound like an experienced engineer, not marketing, HR, or a changelog. Preferred
+verbs: implemented, redesigned, isolated, enforced, validated, covered, migrated,
+split, hardened, removed. Weak verbs to avoid: "worked on X", "some changes were
+made", "items were reviewed", "effort was made". Corporate/marketing patterns are
+default failures: "in line with advancing…", "significant improvement", "effective
+step toward…", "powerful solution", "successfully…". No first person. No decorative
+emojis anywhere — not in the Skill files, references, examples, headings, or
+metadata; use plain Markdown only.
+
+**For Persian reports**, load [references/persian-output.md](references/persian-output.md)
+before drafting prose and again before delivering. Core stance: write as a
+Persian-speaking software engineer would — translate meaning and sentence
+structure, never words; select terminology contextually (established engineering
+loanwords are preferred over forced literary or dictionary-derived Persian;
+English terms, acronyms, identifiers, commands, error codes, and version strings
+stay verbatim in Latin script when that is natural); keep consistency without
+synonym-cycling for variety; strip translationese at sentence level (calqued
+English syntax, bureaucratic constructions, excessive nominalization). Naturalness
+never changes an engineering claim: scope qualifiers and precision outrank
+fluency. After the engineering self-check passes, run the separate language-only
+editorial pass defined there.
 
 ## Step 5 — Self-check before delivering
 
-Run every Work Item through the 17 acceptance tests, both Definitions of Done
+Run every Work Item through the 18 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
 [references/approved-rules.md](references/approved-rules.md). Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
-claim — never invent support for it. Deliver only when every dimension passes.
+claim — never invent support for it. **For Persian output, then run the separate
+language-only editorial pass in
+[references/persian-output.md](references/persian-output.md)** (terminology and
+translation naturalness, independent of engineering content; it must not alter any
+engineering claim). Deliver only when every dimension passes.
 
 ## Reference files (load on demand)
 
@@ -216,9 +232,13 @@ claim — never invent support for it. Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 17 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 18 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
+- [references/persian-output.md](references/persian-output.md) — Persian report
+  language policy: contextual terminology decisions, translationese removal,
+  precision guardrails, final language-only editorial pass. Load only for Persian
+  output.
 - [assets/report-template.md](assets/report-template.md) — exact output skeleton.
 
 ## Scope (neutrality)

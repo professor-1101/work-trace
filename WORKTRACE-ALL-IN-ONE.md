@@ -10,6 +10,7 @@ README.md
 .cline/skills/worktrace-daily-report/references/approved-rules.md
 .cline/skills/worktrace-daily-report/references/evidence-rules.md
 .cline/skills/worktrace-daily-report/references/patterns.md
+.cline/skills/worktrace-daily-report/references/persian-output.md
 .cline/skills/worktrace-daily-report/references/reader-model.md
 .cline/skills/worktrace-daily-report/references/validation.md
 .cline/skills/worktrace-daily-report/assets/report-template.md
@@ -109,7 +110,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 17 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 18 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -225,26 +226,42 @@ internal-reference rule, and the Reader Independence Test.
 
 ### Step 4 — Language and tone (skill is English; report may be Persian)
 
-The report language follows the user's request. For Persian reports: natural Persian
-sentence structure, standard technical terms kept in English, no artificial
-translations, no first person. Preferred verbs: implemented, redesigned, isolated,
-enforced, validated, covered, migrated, split, hardened, removed (and their natural
-Persian equivalents). Weak verbs to avoid: "worked on X", "some changes were made",
-"items were reviewed", "effort was made". Corporate/marketing patterns are default
-failures: "in line with advancing…", "significant improvement", "effective step
-toward…", "powerful solution", "successfully…". Sound like an experienced engineer,
-not marketing, HR, or a changelog. No decorative emojis anywhere — not in the Skill
-files, references, examples, headings, or metadata; use plain Markdown only.
+The report language follows the user's request. Tone rules apply in any language:
+sound like an experienced engineer, not marketing, HR, or a changelog. Preferred
+verbs: implemented, redesigned, isolated, enforced, validated, covered, migrated,
+split, hardened, removed. Weak verbs to avoid: "worked on X", "some changes were
+made", "items were reviewed", "effort was made". Corporate/marketing patterns are
+default failures: "in line with advancing…", "significant improvement", "effective
+step toward…", "powerful solution", "successfully…". No first person. No decorative
+emojis anywhere — not in the Skill files, references, examples, headings, or
+metadata; use plain Markdown only.
+
+**For Persian reports**, load [references/persian-output.md](references/persian-output.md)
+before drafting prose and again before delivering. Core stance: write as a
+Persian-speaking software engineer would — translate meaning and sentence
+structure, never words; select terminology contextually (established engineering
+loanwords are preferred over forced literary or dictionary-derived Persian;
+English terms, acronyms, identifiers, commands, error codes, and version strings
+stay verbatim in Latin script when that is natural); keep consistency without
+synonym-cycling for variety; strip translationese at sentence level (calqued
+English syntax, bureaucratic constructions, excessive nominalization). Naturalness
+never changes an engineering claim: scope qualifiers and precision outrank
+fluency. After the engineering self-check passes, run the separate language-only
+editorial pass defined there.
 
 ### Step 5 — Self-check before delivering
 
-Run every Work Item through the 17 acceptance tests, both Definitions of Done
+Run every Work Item through the 18 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
 [references/approved-rules.md](references/approved-rules.md). Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
-claim — never invent support for it. Deliver only when every dimension passes.
+claim — never invent support for it. **For Persian output, then run the separate
+language-only editorial pass in
+[references/persian-output.md](references/persian-output.md)** (terminology and
+translation naturalness, independent of engineering content; it must not alter any
+engineering claim). Deliver only when every dimension passes.
 
 ### Reference files (load on demand)
 
@@ -257,9 +274,13 @@ claim — never invent support for it. Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 17 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 18 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
+- [references/persian-output.md](references/persian-output.md) — Persian report
+  language policy: contextual terminology decisions, translationese removal,
+  precision guardrails, final language-only editorial pass. Load only for Persian
+  output.
 - [assets/report-template.md](assets/report-template.md) — exact output skeleton.
 
 ### Scope (neutrality)
@@ -672,6 +693,133 @@ not accounts.
 
 ---
 
+## .cline/skills/worktrace-daily-report/references/persian-output.md
+
+## Persian Output: Natural Engineering Prose, Not Translation
+
+Load this reference ONLY when the requested report language is Persian (or another
+language with heavy English-terminology mixing). It governs how the report *reads*.
+It never changes what the report *says*: engineering claims, scope qualifiers, and
+status are fixed by the evidence rules; naturalness must never justify changing,
+weakening, or inventing an underlying claim.
+
+Reference practice: natural Persian technical writing as collected in
+`github.com/ali2000hos/persian-writing` (register selection, translationese tells,
+orthography). The principles below are general; they work across arbitrary stacks,
+domains, and repositories. No glossary is provided on purpose — see "Reasoning
+procedure".
+
+### 1. Core stance
+
+Translate meaning and sentence structure, never words. Draft each sentence from
+the engineering fact you want to convey, as a Persian-speaking software engineer
+would say it to an Engineering Manager — not from the English phrasing of the
+evidence or of an internal mental draft. If a sentence is only correct because its
+English source sentence was correct, rewrite the sentence, not the words.
+
+Target register: **formal-but-human** — full written forms (می‌شود، است، شد), no
+colloquial contractions (میشه، رو، –ه), direct and concrete, zero bureaucratic
+ceremony. This is a professional artifact for CTO/EM readers; warmth comes from
+precision and short sentences, not from formality padding.
+
+### 2. Terminology selection is a contextual decision
+
+For every term, decide by role, usage, and audience — not by dictionary lookup:
+
+- **Established loanwords stay.** If Persian-speaking engineers overwhelmingly use
+  the borrowed word (with or without Persian morphology — تست، دیپلوی، ریفکتور،
+  هاردن، گیت، برنچ), use it. Never force a literary, dictionary-derived, or
+  purist coinage just because one exists; forced Persianization reads worse than
+  the loanword.
+- **Exact technical strings remain recognizable verbatim in Latin script:** code
+  identifiers, API names, commands, flags, error codes (`INVALID_CHANGE_SET_ARTIFACT_STATE`),
+  versions, file paths, product/library names, capability constants. Never
+  transliterate an identifier that a reader may need to grep.
+- **English terms may stand inside Persian grammar** when that is natural for the
+  audience (validation, coverage, baseline, smoke test…). Persian grammar +
+  Persianized loans + Latin terms + acronyms in one sentence is normal, correct
+  technical Persian — do not fight it.
+- **No one-to-one lexical mapping.** The same English word takes different Persian
+  renderings by semantic role: *support* = پشتیبانی برای یک feature، نگه‌داشتن برای
+  یک value، تأیید برای یک type/test; *handle* = مدیریت کردن برای UI behavior،
+  پردازش برای data، رسیدگی برای یک task. Choose per occurrence, by what the word
+  means in that clause.
+- **Consistency without elegant variation.** Render the same concept with the same
+  term throughout the report; but never swap in a synonym merely to avoid
+  repetition (وب‌سایت/سایت/پلتفرم cycling is a machine tell).
+
+### 3. Reasoning procedure (instead of a glossary)
+
+When unsure about a term's rendering, answer four questions in order:
+
+1. What semantic role does this word play in this sentence — identifier, capability,
+   action, property?
+2. Would a Persian-speaking engineer in this domain say the loanword, the common
+   Persian equivalent, or keep the English here?
+3. Does the reader need the exact string to locate or verify it? If yes -> Latin
+   verbatim.
+4. Is the chosen rendering consistent with earlier occurrences of the same concept?
+
+The answer is a language decision informed by context, not a substitution table.
+Do not build or rely on long prohibited-word lists; apply these four questions.
+
+### 4. Sentence-level naturalness (translationese tells)
+
+Remove at sentence level; keep the meaning, lose the tell:
+
+- English syntax carried into Persian: fronted participles («با استفاده از …، X
+  انجام شد»), chains of که-clauses, repeated «را» after every object, passive
+  calques where an active or impersonal Persian construction is natural, «انجام
+  شد / به عمل آمد» stapled to every noun instead of a real verb.
+- Bureaucratic constructions: می‌باشد، گردید، ارائه می‌گردد، مورد … قرار گرفت
+  (e.g., «مورد بررسی قرار گرفت» -> «بررسی شد»), لازم به ذکر است، در راستای،
+  به منظورِ نیل به.
+- Excessive nominalization: stacking ezafe chains where a verb would move
+  («انجام فرآیند مهاجرت تنظیمات» -> «تنظیمات migrate شد»).
+- Literal collocations that exist only as shadows of English idioms.
+- Empty evaluative adjectives (قدرتمند، چشمگیر، اساسی، باکیفیت) — already banned as
+  unsupported claims; they are also style tells.
+- One idea per sentence; short sentences. Mixed sentence lengths are fine —
+  uniform 15–20-word sentences read as machine output.
+- Orthographic mechanics expected by professional Persian readers: نیم‌فاصله in
+  می‌شود/کتاب‌ها/بی‌دقت، Persian ک و ی (never Arabic ي ك)، Persian digits in prose,
+  Latin digits inside identifiers/versions/paths، «؛» over em-dash rhythm.
+
+### 5. Precision guardrails
+
+Naturalness is bounded by fidelity:
+
+- Keep every scope qualifier exactly (در سطح UI، در زمان creation) even when a
+  shorter phrasing would flow better. A smoother sentence that widens a claim is
+  a failed sentence.
+- Do not convert behavior descriptions into evaluations while smoothing them
+  («مسدود می‌کند» must not become «امن می‌کند»).
+- Technical accuracy outranks elegance: a capability check is access-control, not
+  احراز هویت; choose the precise term even if the imprecise one is more common.
+- If naturalizing would require asserting something the evidence does not support,
+  keep the plainer wording.
+
+### 6. Final editorial pass (Persian output only)
+
+After the engineering self-check (references/validation.md) passes, run one
+separate language-only pass over the finished Persian text. Judge it as a Persian
+editor reading only the report — do not re-open grouping, status, or claim
+decisions here, and never alter an engineering claim during this pass:
+
+1. Read-aloud test: would a senior Iranian engineer write this sentence this way?
+2. Any term forced into uncommon/literary Persian where the field uses a loan? Fix
+   by applying section 3.
+3. Any identifier, command, or error code altered or transliterated? Restore verbatim.
+4. Any tell from section 4 left? Rewrite the sentence.
+5. Same concept rendered inconsistently across items? Unify.
+6. Register drift (colloquial forms, ceremonial fillers, first person)? Normalize
+   to formal-but-human.
+
+Deliver only when both passes — engineering validation and this language pass —
+are clean.
+
+---
+
 ## .cline/skills/worktrace-daily-report/references/reader-model.md
 
 ## Reader Model & Terminology Rules
@@ -720,6 +868,12 @@ Domain terms from the codebase (`captured set`, `UNCHANGED`, `reconstitute`,
 `Baseline`) sit between B and C: keep the term **with a few words of plain meaning
 on first use**. GOOD: "On Baseline publish, the full set of relations frozen into that
 version is recorded…" instead of bare "captured set".
+
+How these classes render in a Persian-language report (loanword vs Persian
+equivalent vs Latin-script identifier) is a language decision governed by
+[persian-output.md](persian-output.md), not by this file.
+This section decides *whether* a term belongs in the narrative; that file decides
+*how it reads* in the target language.
 
 ### 3. Independent outcome rule
 
@@ -825,7 +979,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-### Final acceptance tests (17; run per Work Item)
+### Final acceptance tests (18; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -846,6 +1000,7 @@ pairs two different snapshots is rejected at creation time."
 | 15 | Revert | Reverted implementation reported as final accomplishment |
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 | 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
+| 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, transliterated or altered identifiers/commands/error codes, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، or inconsistent rendering of one concept. Run the language-only editorial pass in persian-output.md; this test must never alter an engineering claim |
 
 ### Reject patterns (distilled)
 
@@ -916,9 +1071,13 @@ evidence-fidelity · greenfield-handling · revert-handling · limitation-visibi
 technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
-(RULE-01..RULE-04 incl. exceptions).
+(RULE-01..RULE-04 incl. exceptions) · persian-naturalness (Persian output only;
+language-only pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.
+For Persian reports, the engineering checks above run first; the language-only
+editorial pass in persian-output.md runs after them and must not alter any
+engineering claim.
 
 ---
 

@@ -45,6 +45,12 @@ Domain terms from the codebase (`captured set`, `UNCHANGED`, `reconstitute`,
 on first use**. GOOD: "On Baseline publish, the full set of relations frozen into that
 version is recorded…" instead of bare "captured set".
 
+How these classes render in a Persian-language report (loanword vs Persian
+equivalent vs Latin-script identifier) is a language decision governed by
+[persian-output.md](persian-output.md), not by this file.
+This section decides *whether* a term belongs in the narrative; that file decides
+*how it reads* in the target language.
+
 ## 3. Independent outcome rule
 
 Do not merge two Work Items merely because they share a day, a planning phase, a

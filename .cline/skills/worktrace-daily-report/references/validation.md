@@ -44,7 +44,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-## Final acceptance tests (17; run per Work Item)
+## Final acceptance tests (18; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -65,6 +65,7 @@ pairs two different snapshots is rejected at creation time."
 | 15 | Revert | Reverted implementation reported as final accomplishment |
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 | 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
+| 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, transliterated or altered identifiers/commands/error codes, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، or inconsistent rendering of one concept. Run the language-only editorial pass in persian-output.md; this test must never alter an engineering claim |
 
 ## Reject patterns (distilled)
 
@@ -135,6 +136,10 @@ evidence-fidelity · greenfield-handling · revert-handling · limitation-visibi
 technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
-(RULE-01..RULE-04 incl. exceptions).
+(RULE-01..RULE-04 incl. exceptions) · persian-naturalness (Persian output only;
+language-only pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.
+For Persian reports, the engineering checks above run first; the language-only
+editorial pass in persian-output.md runs after them and must not alter any
+engineering claim.
