@@ -73,6 +73,11 @@ Work Item = **یک واحد معنادار از engineering work با یک outco
   - مثال: `add feature X` + `fix unrelated database issue` → دو Work Item جدا.
 - **معیار grouping** فقط این سؤال است: «آیا این commitها برای دستیابی به یک engineering outcome مشترک انجام شده‌اند؟»
   - Grouping ممنوع بر اساس: commit count، file count، author، directory، timestamp.
+- **Shared-domain ≠ Shared-outcome:** اشتراک حوزه (مثلاً «هر سه test/tooling-related هستند») مجوز ادغام **نیست**. سه outcome مستقل = سه Work Item مستقل، حتی اگر در یک روز و یک حوزه باشند.
+  - ❌ مردود: «ایزوله‌سازی محیط تست Git و رفع ناپایداری‌های E2E و Smoke» در یک Work Item — چون سه outcome مستقل دارد: (A) ایزوله‌سازی env از repo اصلی، (B) پایدارسازی flow بازکردن account menu در E2E، (C) اصلاح payload + limitation باقی‌مانده.
+  - ✅ درست: سه Work Item جدا؛ limitation مربوط به C فقط در گزارش C می‌آید.
+- **عنوان‌های «X و Y» نشانه‌ی هشدارند:** اگر عنوان با «و» دو کار را می‌خواند، بپرس آیا واقعاً یک outcome مشترک دارند یا دو outcome مستقل کنار هم جمع شده‌اند (مثلاً «ساخت صفحه Design Coverage و اصلاح پیکربندی ابزارهای بررسی» → دو Work Item: یک capability جدید، یک tooling/configfix مستقل).
+- **ادغام مجازِ چند-view:** نگه‌داشتن چند Work Item در یک گزارش واحد فقط وقتی مجاز است که واقعاً یک capability واحد باشند **و متن تمایز نقش هر بخش را صریح بگوید**: «برای فراهم‌کردن دو view مکمل از Traceability، Graph برای مشاهده‌ی ساختار روابط و Matrix برای بررسی و مدیریت روابط Requirement–Test Case پیاده‌سازی شدند.» بدون این distinction → جدا کن.
 
 ### Merge Commit Rule
 Merge commit وقتی فقط نتیجه‌ی ادغام کار قبلی است، **accomplishment مستقل نیست** و Work Item جدید نمی‌سازد؛ صرفاً evidence همان work است. (`PR implementation` + `merge commit` ≠ دو Work Item.)
@@ -146,6 +151,27 @@ Context یک مفهوم عمومی است و الزاماً «Problem» نیست
 - ✅ «جریان جدید با integration test پوشش داده شد.» / «behavior جدید در مدل و UI با testهای مربوطه پوشش داده شد.»
 Test decoration نیست؛ اگر بخشی از outcome است ذکر شود، اما claim دقیقاً در سطح evidence بماند.
 
+**Evidence-level Precision (قاعده‌ی Verb-Scope):** فعل‌های نتیجه‌گرا — `prevents` / `guarantees` / `ensures` / `improves` / `secures` / `hardens` / «جلوگیری می‌کند» / «تضمین می‌کند» / «امن شد» / «از تکرار کد جلوگیری می‌شود» — **فقط** وقتی مجازند که دقیقاً و تماماً از evidence قابل دفاع باشند. سه تکنیک الزامی:
+
+1. **Scope qualifier بچسبان:** محدودیت لایه‌ی اعمال را ذکر کن.
+   - ❌ «فرم افزودن لینک از ایجاد لینک‌های نامعتبر جلوگیری می‌کند.» (ادعای کلی؛ ممکن است constraint نهایی در API/domain باشد)
+   - ✅ «فرم افزودن لینک فقط relationship tripleهای مجاز را ارائه می‌کند و ایجاد روابط نامعتبر را **در UI** مسدود می‌کند.»
+2. **Interpretation نتیجه را factual کن:** «منطق مشترک X به لایه Y منتقل شد تا بین درخت و ماتریس در یک لایه‌ی واحد استفاده شود» ✅؛ «...و از تکرار کد جلوگیری گردد» ⚠️ (تفسیر نتیجه — مگر evidence مستقیم داشته باشی).
+3. **Causality ساختگی نساز:** ابزار/تکنولوژی خودش قوانین را enforce نمی‌کند.
+   - ❌ «چیدمان گراف با ELK پیاده‌سازی شد تا قوانین بصری enforce شوند.» (ELK layout/render را مطابق قواعد تعریف‌شده پیاده می‌کند، قانون domain وضع نمی‌کند)
+   - ✅ «چیدمان گراف با ELK و orthogonal routing پیاده‌سازی شد و قواعد نمایش جهت لینک‌ها، حالت legacy و retired در rendering اعمال شدند.»
+
+**Technical Accuracy — اصطلاحات امنیتی/دسترسی:** capability/permission ≠ authentication. هرگز «احراز هویت» برای authorization ننویس.
+- ❌ «Settings gate شد و در صورت عدم احراز هویت لازم از نمایش حذف می‌شود.»
+- ✅ «دسترسی به Settings با capability `MANAGE_PROJECT` gate شد و این بخش بدون آن capability نمایش داده نمی‌شود.»
+
+**Vague Internal References در عنوان:** عناوینی مثل «بر اساس طراحی جدید»، «طبق نسخه‌ی جدید»، «مطابق spec به‌روز» همان بیماری `Phase 2.5` را با اسم دیگر دارند — برای CTO هیچ اطلاعاتی نمی‌دهند («جدید نسبت به چه؟»). مردود در title و narrative. جایش capability و behavior بنویس: ✅ «Specification Explorer برای مدیریت سلسله‌مراتبی Capability، Feature و Requirement پیاده‌سازی شد».
+
+**Domain Terms را بی‌معنا رها نکن:** terminology فنی حذف نمی‌شود، اما هر اصطلاح domain-specific که reader پروژه را نمی‌شناسد باید **یک مقدار معنا** همراه خود بیاورد:
+- ❌ «متد `Baseline.publish` آرایه `relations` را به‌عنوان پارامتر اجباری دریافت می‌کند تا captured set همیشه ضبط شود.»
+- ✅ «هنگام انتشار Baseline (نسخه‌ی فریزشده‌ی روابط)، مجموعه‌ی روابط ثبت‌شده همیشه در آن نسخه ضبط می‌شود؛ `Baseline.publish` اکنون `relations` را اجباری می‌گیرد.»
+همین قاعده برای `UNCHANGED`، `reconstitute`، Change Set States و نام‌های داخلی مشابه جاری است.
+
 ## Step 6 — قالب خروجی
 
 خروجی = فهرست Work Itemهای معنادار. فرم هر Work Item:
@@ -167,6 +193,12 @@ Test decoration نیست؛ اگر بخشی از outcome است ذکر شود، �
 **قالب روایت** (قانون اجباری نیست — همه‌ی workها problem-driven نیستند و ممکن است greenfield / design-driven / architecture-driven / tooling-driven / investigation-driven باشند؛ بنابراین Situation → Action → Result جای خود را به abstraction عمومی‌تر می‌دهد):
 `Context / Rationale → Engineering Work → Outcome → Significance → Status`
 هر بخش optional است مگر evidence وجود داشته باشد.
+
+**Sentence-Utility Rule (الزامی):** هر جمله‌ی گزارش باید دقیقاً یکی از این پنج نقش را داشته باشد: **Context**، **Engineering Action**، **Outcome**، **Evidence** یا **Status**. اگر جمله‌ای هیچ‌کدام نیست → حذف شود. این قانون، متن را از «technical changelog فشرده» به «روایت» برمی‌گرداند.
+
+**Result-First Rule:** در Work Itemهای دارای تاریخچه (revert، بازطراحی)، **نتیجه و capability اول بیاید** و بعد وضعیت history. ❌ «پس از بازگردانی یک پیاده‌سازی ناقص، X از نو پیاده‌سازی شد.» → ✅ «X برای مدیریت ساختار سلسله‌مراتبی Specificationها پیاده‌سازی شد؛ نسخه‌ی نهایی پس از کنارگذاری implementation ناقص اولیه ساخته شد.» خواننده ابتدا باید بفهمد چه چیزی ساخته شده، بعد بداند چرا revert مطرح شده است.
+
+**Weak System Outcome:** اگر گزارشی فقط می‌گوید «A به B migrate شد و وابستگی C حذف شد» بدون هیچ outcome، سطح آن Level 1 مانده است. اگر rationale در evidence هست، همان را بگو (مثلاً «تا مجموعه‌ی آیکون مورد استفاده در navigation با سیستم طراحی یکسان شود»)؛ اگر نیست، claim نساز و لااقل تغییر رفتار/وابستگی observable را ذکر کن.
 
 ## Step 7 — زبان و لحن
 
@@ -208,6 +240,34 @@ Test decoration نیست؛ اگر بخشی از outcome است ذکر شود، �
 
 **Preferred (Context→Change→Outcome→Evidence):** «stateهای ذخیره‌شده باید پس از سخت‌ترشدن validation creation همچنان قابل خواندن باقی می‌ماندند. برای جداسازی این دو مسیر، mapper به `reconstitute` منتقل شد و `create` برای `UNCHANGED` با دو snapshot متفاوت خطای مشخص برمی‌گرداند؛ round-trip و domain test نیز رفتار read و write را پوشش می‌دهند.»
 
+**Rebuild-after-revert (Result-First + بدون عنوان مبهم):**
+- ❌ «بازطراحی و پیاده‌سازی Specification Explorer بر اساس طراحی جدید — پس از بازگردانی یک پیاده‌سازی ناقص، X از نو پیاده‌سازی شد...» (عنوان مبهم + history-first)
+- ✅ «Specification Explorer برای مدیریت سلسله‌مراتبی Capability، Feature و Requirement پیاده‌سازی شد. درخت specifications بر اساس لینک‌های `DECOMPOSES` ترسیم می‌شود و جابه‌جایی گره‌ها (دیالوگ / drag-drop / کیبورد)، detachment و نمایش وضعیت coverage برای هر گره ممکن شد؛ این نسخه پس از کنارگذاری implementation ناقص اولیه ساخته شد.»
+
+**Shared logic بین دو view (factual، بدون ادعای DRY):**
+- ⚠️ «منطق مشترک خوانش پوشش به لایه entities/trace منتقل شد تا بین درخت و ماتریس به اشتراک گذاشته شود و از تکرار کد جلوگیری گردد.» («جلوگیری از تکرار کد» interpretation است)
+- ✅ «منطق مشترک خوانش coverage در یک لایه واحد قرار گرفت تا درخت و ماتریس هر دو از همان مسیر استفاده کنند.»
+
+**Capability gating (technical accuracy):**
+- ❌ «دسترسی Settings gate شد و در صورت عدم احراز هویت لازم از نمایش حذف می‌شود.»
+- ✅ «دسترسی به Settings با capability `MANAGE_PROJECT` gate شد و این بخش بدون آن capability نمایش داده نمی‌شود.»
+
+**UI-scoped constraint (Verb-Scope):**
+- ❌ «فرم افزودن لینک از ایجاد لینک‌های نامعتبر جلوگیری می‌کند.»
+- ✅ «فرم افزودن لینک فقط relationship tripleهای مجاز طبق قوانین رابطه را ارائه می‌کند و ایجاد روابط نامعتبر را در UI مسدود می‌کند.»
+
+**ELK layout (بدون causality ساختگی):**
+- ❌ «چیدمان گراف با ELK پیاده‌سازی شد تا قوانین بصری enforce شوند.»
+- ✅ «چیدمان گراف با ELK و orthogonal routing پیاده‌سازی شد و قواعد نمایش جهت لینک‌ها، استایل legacy و عدم نمایش لینک‌های retired در rendering اعمال شدند.»
+
+**Domain term با معنا:**
+- ❌ «`Baseline.publish` آرایه `relations` را اجباری می‌گیرد تا captured set همیشه ضبط شود.»
+- ✅ «هنگام انتشار Baseline (نسخه‌ی فریزشده)، مجموعه‌ی روابط ثبت‌شده همیشه در همان نسخه ضبط می‌شود؛ `Baseline.publish` اکنون لیست روابط را به‌صورت پارامتر اجباری دریافت می‌کند.»
+
+**Tooling/config به‌عنوان outcome مستقل:**
+- ❌ ادغام در Work Item صفحه‌ی Design Coverage («صفحه ... و اصلاح پیکربندی ابزارها»).
+- ✅ Work Item جدا: «ابزارهای بررسی، دایرکتوری‌های گزارش coverage را به‌درستی شناسایی می‌کنند و دیگر توسط tooling نادیده گرفته نمی‌شوند.»
+
 ## Step 9 — Reader Model و Internal References (الزامی)
 
 **Reader Model:** گزارش برای **خواننده** نوشته می‌شود، نه Repository. خواننده را چنین فرض کن: CTO / Engineering Manager که پروژه را می‌شناسد اما در جزئیات implementation، Git history، planning داخلی و نام‌گذاری داخلی پروژه حضور نداشته است. او باید بدون دانش قبلی از repo بفهمد: چه چیزی ساخته/اصلاح شده؟ چه capability یا behaviorی ایجاد شده؟ چرا (فقط با evidence)؟ معنای سیستمی تغییر چیست؟ کار complete است یا limitation/blocker/follow-up دارد؟
@@ -231,6 +291,12 @@ Test decoration نیست؛ اگر بخشی از outcome است ذکر شود، �
 
 **Reader Independence Test:** «اگر عنوان و متن را به یک CTO بدهم که هیچ‌چیز درباره‌ی Phaseها، ticketها یا planning labels نمی‌داند، آیا می‌فهمد این work چه چیزی به سیستم اضافه/اصلاح کرده؟» اگر نه → بازنویسی.
 
+**Anti-pattern — vague internal reference در لباس ظاهراً بی‌طرف:** عبارت‌هایی مثل «بر اساس طراحی جدید»، «طبق نسخه‌ی جدید»، «مطابق طرح به‌روز» **internal reference مبهم** هستند، حتی اگر کلمه‌ی Phase نداشته باشند؛ زیرا «جدید نسبت به چه؟» را reader نمی‌تواند پاسخ دهد. مردود در title و narrative؛ جای آن capability و behavior بنشیند (نگاه کنید به Step 5).
+
+**Implementation-heavy ≠ روایت:** فهرست کردن نام hookها، helperها و مسیر لایه‌ها (`useGraphAndKinds`، `byCode`، `present`، `entities/trace`، `shared/lib`) در یک Work Item روزانه ارزش گزارشی ندارد، مگر فهم outcome را بهتر کند. قاعده: هر implementation detail فقط در صورت ضرورت برای فهم Outcome باقی می‌ماند؛ مثال مجاز: «منطق خواندن Graph به یک مسیر مشترک منتقل شد تا همان داده در viewهای مختلف Traceability استفاده شود» (بدون نام فایل/helper).
+
+**Title Rule تکمیلی:** ❌ «بازطراحی X بر اساس طراحی جدید» / ✅ «X برای مدیریت سلسله‌مراتبی Capability، Feature و Requirement پیاده‌سازی شد».
+
 ## Step 10 — Self-Check قبل از خروجی
 
 ### Minimum Acceptable (حداقل هر گزارش)
@@ -245,7 +311,7 @@ outcome مستقل و قابل تشخیص؛ عنوان outcome-oriented؛ متن
 ### Daily Report DOD (DOD-D1..14)
 تمام commitهای relevant روز بررسی شده؛ به Work Itemهای meaningful تبدیل شده؛ هر Work Item یک outcome مستقل؛ grouping درست؛ mergeها duplicate نساخته‌اند؛ revertها با history بعدی تفسیر شده‌اند؛ rationale/impact ساختگی ندارد؛ صرفاً commit summary نیست؛ خواننده می‌فهمد «چه چیزی اضافه/اصلاح شد»؛ در صورت evidence «چرا» و «چه چیزی ممکن شد» منتقل شده؛ limitationها پنهان نشده‌اند؛ سطح engineering outcome (نه file/change log)؛ بدون دانستن جزئیات repo قابل خواندن است.
 
-### Final Acceptance Tests (هر Work Item را با این ۱۱ تست بسنج)
+### Final Acceptance Tests (هر Work Item را با این ۱۵ تست بسنج)
 1. **What?** — engineering work مشخص است؟ اگر نه → FAIL.
 2. **Why?** — rationale با evidence منتقل شده؟ evidence هست و حذف شده → FAIL؛ evidence نیست و اختراع شده → FAIL؛ evidence نیست و حذف شده → PASS.
 3. **So What? / Outcome** — بعد از تغییر چه ممکن/متفاوت شد؟ قابل استنتاج هست ولی نشان داده نشده → FAIL؛ evidence اجازه استنتاج نمی‌دهد → PASS.
@@ -255,11 +321,19 @@ outcome مستقل و قابل تشخیص؛ عنوان outcome-oriented؛ متن
 7. **Duplication** — merge/revert/duplicate باعث گزارش تکراری شده؟ اگر بله → FAIL.
 8. **Language** — متن vague/تبلیغاتی/corporate شده؟ اگر بله → FAIL.
 9. **Internal Reference** — عبارت‌هایی مثل Phase، ticket، PR، U-code و planning label بی‌دلیل وارد narrative شده‌اند؟ اگر بله → FAIL (حذف یا translate به system meaning).
-10. **Grouping** — آیا دو outcome مستقل به اشتباه یکی شده‌اند؟ اگر بله → FAIL (Work Itemها را جدا کن).
-11. **Revert** — آیا implementation reverted به‌عنوان accomplishment نهایی آمده؟ اگر بله → FAIL.
+10. **Grouping** — آیا دو outcome مستقل به اشتباه یکی شده‌اند؟ اگر بله → FAIL (Work Itemها را جدا کن). نشانه‌های هشدار: عنوان «X و Y»، اشتراک فقط در حوزه (test/tooling)، یا فقط هم‌روز/هم-branch بودن.
+11. **Revert** — آیا implementation reverted به‌عنوان accomplishment نهایی آمده؟ اگر بله → FAIL. آیا پاراگراف با history شروع شده به‌جای نتیجه؟ اگر بله → Result-First را بازبنویس.
+12. **Sentence Utility** — آیا هر جمله یکی از نقش‌های Context / Action / Outcome / Evidence / Status را دارد؟ جمله‌ی بی‌نقش → حذف.
+13. **Verb Scope** — آیا هر فعل نتیجه‌گرا (`prevents`/`guarantees`/`ensures`/`improves`/«جلوگیری می‌کند»/«تضمین می‌کند») دقیقاً در سطح و لایه‌ی evidence نوشته شده (مثلاً قید «در UI»)؟ اگر ادعا فراتر از scope است → FAIL.
+14. **Terminology Accuracy** — آیا capability/permission با authentication خلط نشده؟ آیا ابزار/کتابخانه نقش قانون‌گذاری ندارد (ELK enforce نمی‌کند)؟ اگر بله → FAIL.
+15. **Term Meaningfulness** — آیا هر domain term برای reader ناآشنا حداقل یک مقدار معنا همراه خود دارد (`captured set`، `UNCHANGED`، Baseline)؟ بدون شرح → FAIL.
 
 ### الگوهای مردود (Reject Patterns)
-فقط paraphrase کردن commit؛ فقط activity («۱۷ فایل تغییر کرد»)؛ rationale ساختگی؛ اختراع previous system؛ اختراع business impact؛ مشخص‌نکردن نتیجه («UI بازطراحی شد» بدون توضیح چه چیزی تغییر کرده); implementation detail بیش‌ازحد بدون outcome؛ پنهان‌کردن limitation؛ معرفی کار reverted به‌عنوان accomplishment؛ گزارش دوباره‌ی merge commit؛ پرکردن متن با buzzword؛ آوردن internal planning references در narrative؛ ادغام دو outcome مستقل فقط به دلیل shared phase/day/branch؛ evaluation بدون evidence («قابل‌اعتماد/امن/چشمگیر/تضمین شد»).
+فقط paraphrase کردن commit؛ فقط activity («۱۷ فایل تغییر کرد»)؛ rationale ساختگی؛ اختراع previous system؛ اختراع business impact؛ مشخص‌نکردن نتیجه («UI بازطراحی شد» بدون توضیح چه چیزی تغییر کرده); implementation detail بیش‌ازحد بدون outcome؛ پنهان‌کردن limitation؛ معرفی کار reverted به‌عنوان accomplishment؛ گزارش دوباره‌ی merge commit؛ پرکردن متن با buzzword؛ آوردن internal planning references در narrative؛ ادغام دو outcome مستقل فقط به دلیل shared phase/day/branch/حوزه‌ی مشترک (test/tooling بودنِ هر سه کار ≠ یک outcome)؛ evaluation بدون evidence («قابل‌اعتماد/امن/چشمگیر/تضمین شد»)؛ **claim فراتر از scope** («از ایجاد لینک نامعتبر جلوگیری می‌کند» بدون قید UI، در حالی که constraint نهایی ممکن است لایه‌ی دیگری باشد)؛ **causality ساختگی** («ELK قوانین بصری را enforce می‌کند» — ابزار rendering، قانون‌گذار نیست)؛ **interpretation نتیجه به‌جای fact** («جلوگیری از تکرار کد» بدون evidence)؛ **خلط capability و authentication** («عدم احراز هویت» برای permission gating)؛ **vague internal reference در عنوان** («بر اساس طراحی جدید»)؛ **domain term بی‌معنا** (`captured set`، `UNCHANGED` بدون شرح برای reader ناآشنا)؛ **history-first writing** (شروع پاراگراف با revert به‌جای نتیجه)؛ **implementation name-dropping** (لیست hook/helper/path بدون ارزش outcome)؛ جمله‌ی فاقد نقش (هر جمله باید Context / Action / Outcome / Evidence / Status باشد، وگرنه حذف).
+
+### Scorecard (PASS/FAIL — نه نمره‌دهی)
+گزارش فقط وقتی Final است که همه‌ی ردیف‌ها PASS باشند؛ هر ⚠️ یعنی «Draft خوب، نه Final»:
+Commit-summary نبودن | Outcome-orientation | Reader-orientation | حذف Phase/Ticket/planning jargon | Evidence fidelity (claimها <= evidence) | Greenfield handling | Revert handling | Limitation visibility | Technical accuracy (اصطلاح auth/capability درست) | **Work Item grouping (هر Work Item = یک outcome مستقل)** | Business hallucination (نباید باشد) | Corporate fluff (نباید باشد) | Conciseness (نه dense) | System significance.
 
 ## Step 11 — معیار نهایی
 
@@ -285,5 +359,7 @@ outcome مستقل و قابل تشخیص؛ عنوان outcome-oriented؛ متن
 3. برای هر Work Item لایه‌های Context→Work→Outcome→Significance→Status را **فقط از evidence** استخراج کن.
 4. Internal references (Phase/ticket/PR/U-code/planning labels) را حذف یا به system-level meaning تبدیل کن (Step 9).
 5. گزارش را طبق قالب Step 6 و قواعد زبان Step 7 بنویس.
-6. قبل از خروجی، Step 10 (Self-Check + ۱۱ Acceptance Tests) را اجرا و موارد مردود را بازنویسی کن.
-7. خروجی نهایی: فهرست Work Itemها با فرم `### عنوان` + پاراگراف یکپارچه؛ بدون meta-introduction («بر اساس شواهد موجود...» و مشابه)، بدون توضیح «چه تغییراتی دادم»، بدون appendices حاوی file log یا commit list مگر درخواست صریح.
+6. قبل از خروجی، Step 10 (Self-Check + ۱۵ Acceptance Tests + Scorecard) را اجرا و موارد مردود را بازنویسی کن.
+7. **Grouping re-audit (الزامی):** برای هر Work Item دوباره بپرس «آیا دقیقاً یک outcome مستقل دارد؟» اگر عنوان «X و Y» است یا تنها پیوند کارها اشتراک حوزه/روز/branch است، به Work Itemهای مستقل بشکن. ادغام چند-view فقط با distinction صریح مجاز است.
+8. **Evidence-level precision pass:** فعل‌های نتیجه‌گرا (`prevents`/`guarantees`/`ensures`/`improves`/«جلوگیری می‌کند») را پیدا کن؛ برای هر کدام scope qualifier (لایه‌ی اعمال) اضافه یا claim را به سطح evidence برگردان؛ capability ≠ authentication را چک کن؛ domain terms بی‌معنا را با یک مقدار معنا تکمیل کن؛ جمله‌های فاقد نقش (Context/Action/Outcome/Evidence/Status) را حذف کن.
+9. خروجی نهایی: فهرست Work Itemها با فرم `### عنوان` + پاراگراف یکپارچه؛ بدون meta-introduction («بر اساس شواهد موجود...» و مشابه)، بدون توضیح «چه تغییراتی دادم»، بدون appendices حاوی file log یا commit list مگر درخواست صریح.
