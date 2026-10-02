@@ -111,7 +111,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 19 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 20 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -146,6 +146,11 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   and do not merge them merely because the types match. The governing rule stays
   `1 Work Item = 1 independent, meaningful engineering outcome`; never group or
   split solely by commit, PR, domain, implementation layer, or engineering type.
+  Cross-cutting changes (a dependency/library migration, a shared-module move)
+  get the same outcome-independence test: keep them inside one item when they
+  genuinely serve that outcome; split them into their own item when the change is
+  itself an independently meaningful outcome for the reader — decide by outcome
+  independence, never by implementation type alone.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
 - **Reverts**: do not require every revert to appear in the report. Mention a
@@ -245,14 +250,18 @@ writing any sentence that claims a *why*, an *impact*, or a
   test-script fixes do not earn a heading implying broad "test infrastructure
   stabilization"; four isolated script/tool fixes get a title scoped to those
   fixes. If the heading claims more than the item's sentences prove, narrow the
-  heading (or split the item).
+  heading (or split the item). A heading that enumerates multiple independent
+  outcomes ("X and Y and Z") signals bundled items: split the item so each heading
+  matches its own evidence.
 - **Result first**: open with what was built/changed and what it enables; put revert
   or history context after the result, not before it.
 - **Capability first**: present the capability or outcome before the implementation
   mechanism. Prefer "Traceability Matrix was added to let users inspect and manage
   Requirement-Test Case relationships" over "An ARIA grid was implemented with
   selected-cell write operations"; implementation detail may follow when it adds
-  useful technical meaning.
+  useful technical meaning. This is an ordering preference, not a rigid sentence
+  template: lead with the mechanism only when the mechanism itself is the
+  outcome's meaning (e.g., isolation, layout shape, a contract change).
 - **Sentence-utility rule**: every sentence must deliver at least one of Context /
   Engineering Work / Outcome / System Significance / Evidence / Status-Limitation.
   If a sentence delivers none of these, remove it.
@@ -296,12 +305,13 @@ defined there (terminology / naturalness / fidelity / mechanics).
 
 ### Step 5 — Self-check before delivering
 
-Run every Work Item through the 19 acceptance tests, both Definitions of Done
+Run every Work Item through the 20 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
-[references/approved-rules.md](references/approved-rules.md), and test 19 checks
-each heading for scope proportionality against its evidence. Fix anything that
+[references/approved-rules.md](references/approved-rules.md), test 19 checks
+each heading for scope proportionality against its evidence, and test 20 checks
+that claimed bases/sources of an implementation are evidenced artifacts. Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
 claim — never invent support for it. **For Persian output, then run the separate
 language-only editorial pass in
@@ -320,7 +330,7 @@ engineering claim). Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 19 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 20 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
 - [references/persian-output.md](references/persian-output.md) — Persian report
@@ -568,6 +578,16 @@ evidence supports — no stronger. "UI blocks invalid relationship selection" mu
 not become "the system prevents invalid relationships"; "tests cover the flow"
 must not become "quality is guaranteed".
 
+**Claimed bases and sources are evidence-bound too.** If the report states that an
+implementation was based on, rebuilt from, or aligned with a design document,
+specification, approved decision, RFC, or similar source artifact, repository
+evidence must actually establish that relationship (the artifact exists in the
+evidence and demonstrably drives the change). Never invent or infer the authority,
+basis, or source of an implementation. When no evidenced basis exists, describe
+what the code does and what state the repository ended in — drop the claimed
+source entirely. This applies equally to revert narratives: "rewritten from the
+approved design" is forbidden unless the approved design is in the evidence.
+
 **No forced business framing**: do not push every Work Item into Quality / Speed /
 Cost / Risk-Reduction categories, do not require a KPI or metric for a refactor,
 and do not quantify impact when no quantified evidence exists.
@@ -592,7 +612,14 @@ the change means at the system level — it is not business value.
 
 Without evidence, never write: reliable, secure, stable, significant, substantial,
 important, optimized, performant, successful, complete, "guaranteed quality",
-"markedly improved". Report behavior or evidence instead.
+"markedly improved". Claim strength must never exceed the evidence: guarantee and
+completeness verbs ("guarantees", "ensures that ... without problems", "fully
+stable") require evidence that actually demonstrates the guarantee — tests,
+verified behavior, or enforced constraints in the diff. Otherwise report the
+mechanism and its evidenced effect: BAD: "this guarantees historical data reads
+without problems" -> GOOD: "stored states remain readable because the read path
+bypasses the new creation validation" (behavior, no absolute claim). Report
+behavior or evidence instead.
 
 - BAD: "System security improved."
 - GOOD: "Access to Settings is gated by the `MANAGE_PROJECT` capability, and the guard
@@ -905,7 +932,13 @@ description. The same English concept may legitimately render differently across
 domains (graph relationships vs release baselines vs document lifecycle). This
 procedure replaces any word-level mapping rule; no `retire -> X` or
 `frozen -> Y` table exists in this skill, and none should be inferred from
-examples. Naturalization must never alter the technical semantics of the claim.
+examples. **Lifecycle operations stay semantically distinct.** retire, delete,
+archive, deactivate, restore, soft-remove, and hard-remove are different domain
+operations; do not flatten them into one Persian verb, and do not present a
+lifecycle transition (retire) as its opposite or as plain removal (link/unlink).
+Determine which operation the code actually performs first, then express it —
+the distinction is part of the engineering claim and survives naturalization.
+Naturalization must never alter the technical semantics of the claim.
 
 ### 4. Sentence-level naturalness (translationese tells)
 
@@ -951,6 +984,14 @@ engineering evidence did not contain):
   form with the loanword it duplicates («از طریق انشعاب (fork)» style doubles)
   where one of the two carries all the meaning; keep the one a practitioner would
   use alone.
+- **English-shaped "names/calls/considers" calques on state or object
+    descriptions** — constructions like «stateای که دو snapshot متفاوت را نام
+    می‌برد» (calquing "a state that names two different snapshots"), where an
+    English verb of naming maps onto a Persian state description. Recast to what
+    the state actually is: describe the stored relationship («وضعیتی که دو
+    snapshot متفاوت را به‌عنوان پایه و فعلی نگه می‌دارد» style) instead of
+    translating the English verb literally. The rewrite must sound natural while
+    preserving the technical meaning exactly.
 - Empty evaluative adjectives (قدرتمند، چشمگیر، اساسی، باکیفیت) — already banned as
   unsupported claims; they are also style tells.
 - One idea per sentence; short sentences. Mixed sentence lengths are fine —
@@ -1000,7 +1041,8 @@ independent checks, then mechanics last:
    the same concept received multiple names? Resolve each finding with section 3.
 2. **Naturalness.** Does every sentence sound originally written in Persian? Check
    for English-shaped syntax, English-shaped passive/relative-clause calques,
-   literal dictionary translations of abstract technical concepts, redundant
+   literal dictionary translations of abstract technical concepts, flattened
+   lifecycle distinctions, English-shaped names/calls calques, redundant
    Persian/English hybrid doubles, calqued function words, bureaucratic verbs,
    AI-style clusters, and uniform rhythm from section 4. The test question: would a
    senior Iranian engineer sign this sentence?
@@ -1196,7 +1238,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-### Final acceptance tests (19; run per Work Item)
+### Final acceptance tests (20; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -1218,7 +1260,8 @@ pairs two different snapshots is rejected at creation time."
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 | 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
 | 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, an invented coinage no field uses, transliterated or altered identifiers/commands/error codes inside protected spans, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، AI-style clusters, or inconsistent rendering of one concept. Run the four-check language-only editorial pass (terminology / naturalness / fidelity / mechanics) in persian-output.md; this test must never alter an engineering claim |
-| 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
+| 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"), OR the heading bundles multiple independent outcomes under one title ("X and Y and Z"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
+| 20 | Evidenced Basis | Report claims an implementation was based on / rebuilt from / aligned with a design, specification, approved decision, or similar source artifact that repository evidence does not establish. Fix: drop the claimed basis and describe what the code does and the final repository state |
 
 ### Reject patterns (distilled)
 
@@ -1235,7 +1278,7 @@ pairs two different snapshots is rejected at creation time."
 11. Buzzword padding.
 12. Planning terminology inside narrative; vague pointers like "new design".
 
-### Anti-pattern catalog (AP-1..25, recurring failure shapes)
+### Anti-pattern catalog (AP-1..26, recurring failure shapes)
 
 - **AP-1 Activity-only item** — counts/diffs instead of meaning. Fix: Level 2+.
 - **AP-2 Invented why** — motivation without evidence. Fix: start from work itself.
@@ -1302,8 +1345,14 @@ pairs two different snapshots is rejected at creation time."
   deliver one outcome. Type labels never force either direction.
 - **AP-25 Over-broad heading** — a Work Item heading claiming system-wide scope
   ("test infrastructure stabilization", "architecture overhaul") that the item's
-  evidence does not support. Fix: retitle to the evidenced scope or split the
-  item (see acceptance test 19).
+  evidence does not support, or a heading bundling several independent outcomes
+  under one title. Fix: retitle to the evidenced scope or split the item
+  (see acceptance test 19).
+- **AP-26 Invented basis/source** — attributing an implementation to an approved
+  design, specification, decision, or authority artifact that repository evidence
+  does not establish ("rebuilt from the approved design"). Fix: report only the
+  evidenced facts — what the code does, what changed, the final repository state
+  (see acceptance test 20).
 
 ### PASS/FAIL scorecard (final gate)
 
@@ -1315,7 +1364,7 @@ technical-accuracy · grouping-quality · no-business-hallucination · no-corpor
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
 (RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
-heading-scope-proportionality · persian-naturalness (Persian output only; language-only
+heading-scope-proportionality · evidenced-basis · persian-naturalness (Persian output only; language-only
 pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.

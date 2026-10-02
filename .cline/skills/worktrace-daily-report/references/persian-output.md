@@ -96,7 +96,13 @@ description. The same English concept may legitimately render differently across
 domains (graph relationships vs release baselines vs document lifecycle). This
 procedure replaces any word-level mapping rule; no `retire -> X` or
 `frozen -> Y` table exists in this skill, and none should be inferred from
-examples. Naturalization must never alter the technical semantics of the claim.
+examples. **Lifecycle operations stay semantically distinct.** retire, delete,
+archive, deactivate, restore, soft-remove, and hard-remove are different domain
+operations; do not flatten them into one Persian verb, and do not present a
+lifecycle transition (retire) as its opposite or as plain removal (link/unlink).
+Determine which operation the code actually performs first, then express it —
+the distinction is part of the engineering claim and survives naturalization.
+Naturalization must never alter the technical semantics of the claim.
 
 ## 4. Sentence-level naturalness (translationese tells)
 
@@ -142,6 +148,14 @@ engineering evidence did not contain):
   form with the loanword it duplicates («از طریق انشعاب (fork)» style doubles)
   where one of the two carries all the meaning; keep the one a practitioner would
   use alone.
+- **English-shaped "names/calls/considers" calques on state or object
+    descriptions** — constructions like «stateای که دو snapshot متفاوت را نام
+    می‌برد» (calquing "a state that names two different snapshots"), where an
+    English verb of naming maps onto a Persian state description. Recast to what
+    the state actually is: describe the stored relationship («وضعیتی که دو
+    snapshot متفاوت را به‌عنوان پایه و فعلی نگه می‌دارد» style) instead of
+    translating the English verb literally. The rewrite must sound natural while
+    preserving the technical meaning exactly.
 - Empty evaluative adjectives (قدرتمند، چشمگیر، اساسی، باکیفیت) — already banned as
   unsupported claims; they are also style tells.
 - One idea per sentence; short sentences. Mixed sentence lengths are fine —
@@ -191,7 +205,8 @@ independent checks, then mechanics last:
    the same concept received multiple names? Resolve each finding with section 3.
 2. **Naturalness.** Does every sentence sound originally written in Persian? Check
    for English-shaped syntax, English-shaped passive/relative-clause calques,
-   literal dictionary translations of abstract technical concepts, redundant
+   literal dictionary translations of abstract technical concepts, flattened
+   lifecycle distinctions, English-shaped names/calls calques, redundant
    Persian/English hybrid doubles, calqued function words, bureaucratic verbs,
    AI-style clusters, and uniform rhythm from section 4. The test question: would a
    senior Iranian engineer sign this sentence?

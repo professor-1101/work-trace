@@ -68,7 +68,7 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 19 acceptance tests — see Step 5)
+Validate Against Evidence      (run all 20 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -103,6 +103,11 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   and do not merge them merely because the types match. The governing rule stays
   `1 Work Item = 1 independent, meaningful engineering outcome`; never group or
   split solely by commit, PR, domain, implementation layer, or engineering type.
+  Cross-cutting changes (a dependency/library migration, a shared-module move)
+  get the same outcome-independence test: keep them inside one item when they
+  genuinely serve that outcome; split them into their own item when the change is
+  itself an independently meaningful outcome for the reader — decide by outcome
+  independence, never by implementation type alone.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
 - **Reverts**: do not require every revert to appear in the report. Mention a
@@ -202,14 +207,18 @@ writing any sentence that claims a *why*, an *impact*, or a
   test-script fixes do not earn a heading implying broad "test infrastructure
   stabilization"; four isolated script/tool fixes get a title scoped to those
   fixes. If the heading claims more than the item's sentences prove, narrow the
-  heading (or split the item).
+  heading (or split the item). A heading that enumerates multiple independent
+  outcomes ("X and Y and Z") signals bundled items: split the item so each heading
+  matches its own evidence.
 - **Result first**: open with what was built/changed and what it enables; put revert
   or history context after the result, not before it.
 - **Capability first**: present the capability or outcome before the implementation
   mechanism. Prefer "Traceability Matrix was added to let users inspect and manage
   Requirement-Test Case relationships" over "An ARIA grid was implemented with
   selected-cell write operations"; implementation detail may follow when it adds
-  useful technical meaning.
+  useful technical meaning. This is an ordering preference, not a rigid sentence
+  template: lead with the mechanism only when the mechanism itself is the
+  outcome's meaning (e.g., isolation, layout shape, a contract change).
 - **Sentence-utility rule**: every sentence must deliver at least one of Context /
   Engineering Work / Outcome / System Significance / Evidence / Status-Limitation.
   If a sentence delivers none of these, remove it.
@@ -253,12 +262,13 @@ defined there (terminology / naturalness / fidelity / mechanics).
 
 ## Step 5 — Self-check before delivering
 
-Run every Work Item through the 19 acceptance tests, both Definitions of Done
+Run every Work Item through the 20 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
-[references/approved-rules.md](references/approved-rules.md), and test 19 checks
-each heading for scope proportionality against its evidence. Fix anything that
+[references/approved-rules.md](references/approved-rules.md), test 19 checks
+each heading for scope proportionality against its evidence, and test 20 checks
+that claimed bases/sources of an implementation are evidenced artifacts. Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
 claim — never invent support for it. **For Persian output, then run the separate
 language-only editorial pass in
@@ -277,7 +287,7 @@ engineering claim). Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 19 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 20 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
 - [references/persian-output.md](references/persian-output.md) — Persian report

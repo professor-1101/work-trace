@@ -44,7 +44,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-## Final acceptance tests (19; run per Work Item)
+## Final acceptance tests (20; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -66,7 +66,8 @@ pairs two different snapshots is rejected at creation time."
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 | 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
 | 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, an invented coinage no field uses, transliterated or altered identifiers/commands/error codes inside protected spans, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، AI-style clusters, or inconsistent rendering of one concept. Run the four-check language-only editorial pass (terminology / naturalness / fidelity / mechanics) in persian-output.md; this test must never alter an engineering claim |
-| 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
+| 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"), OR the heading bundles multiple independent outcomes under one title ("X and Y and Z"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
+| 20 | Evidenced Basis | Report claims an implementation was based on / rebuilt from / aligned with a design, specification, approved decision, or similar source artifact that repository evidence does not establish. Fix: drop the claimed basis and describe what the code does and the final repository state |
 
 ## Reject patterns (distilled)
 
@@ -83,7 +84,7 @@ pairs two different snapshots is rejected at creation time."
 11. Buzzword padding.
 12. Planning terminology inside narrative; vague pointers like "new design".
 
-## Anti-pattern catalog (AP-1..25, recurring failure shapes)
+## Anti-pattern catalog (AP-1..26, recurring failure shapes)
 
 - **AP-1 Activity-only item** — counts/diffs instead of meaning. Fix: Level 2+.
 - **AP-2 Invented why** — motivation without evidence. Fix: start from work itself.
@@ -150,8 +151,14 @@ pairs two different snapshots is rejected at creation time."
   deliver one outcome. Type labels never force either direction.
 - **AP-25 Over-broad heading** — a Work Item heading claiming system-wide scope
   ("test infrastructure stabilization", "architecture overhaul") that the item's
-  evidence does not support. Fix: retitle to the evidenced scope or split the
-  item (see acceptance test 19).
+  evidence does not support, or a heading bundling several independent outcomes
+  under one title. Fix: retitle to the evidenced scope or split the item
+  (see acceptance test 19).
+- **AP-26 Invented basis/source** — attributing an implementation to an approved
+  design, specification, decision, or authority artifact that repository evidence
+  does not establish ("rebuilt from the approved design"). Fix: report only the
+  evidenced facts — what the code does, what changed, the final repository state
+  (see acceptance test 20).
 
 ## PASS/FAIL scorecard (final gate)
 
@@ -163,7 +170,7 @@ technical-accuracy · grouping-quality · no-business-hallucination · no-corpor
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
 term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
 (RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
-heading-scope-proportionality · persian-naturalness (Persian output only; language-only
+heading-scope-proportionality · evidenced-basis · persian-naturalness (Persian output only; language-only
 pass per persian-output.md).
 
 Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.

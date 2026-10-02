@@ -136,6 +136,36 @@
         "The scope qualifier 'در UI' is retained even though the sentence flows shorter without it",
         "No new fact, evaluation, or system-wide guarantee is introduced during rewording"
       ]
+    },
+    {
+      "id": 14,
+      "target": "lifecycle terminology fidelity (retire vs delete/unlink)",
+      "input": "Matrix cells support linking a relationship and retiring it (retired links remain visible under display rules). Draft renders both operations as 'لینک کردن و حذف کردن'.",
+      "assertions": [
+        "The pass detects flattening of retire into plain removal/unlink",
+        "The rewrite expresses the actual domain operation (deactivating an active relationship while keeping history) without inventing a fixed retire->word mapping",
+        "The semantic distinction between retire and delete survives naturalization"
+      ]
+    },
+    {
+      "id": 15,
+      "target": "English-shaped names/calls calque recast naturally",
+      "input": "Sentence: 'وضعیتی که دو snapshot متفاوت را نام می‌برد' calquing 'a state that names two different snapshots'.",
+      "assertions": [
+        "The tell is detected as an English verb-of-naming calque on a state description",
+        "Recast describes the stored relationship (e.g., holding two different snapshots as base and current)",
+        "The technical meaning of the validation rule is unchanged by the recast"
+      ]
+    },
+    {
+      "id": 16,
+      "target": "guarantee/completeness wording bounded by evidence",
+      "input": "Draft sentence: 'این تغییر تضمین می‌کند داده‌های تاریخی بدون مشکل خوانده می‌شوند' for a mapper read path that bypasses creation validation; no tests cited.",
+      "assertions": [
+        "'تضمین می‌کند ... بدون مشکل' is rejected because claim strength exceeds evidence",
+        "Rewritten to the evidenced behavior: stored states remain readable because the read path skips the new creation validation",
+        "No absolute completeness claim remains; scope preserved"
+      ]
     }
   ]
 }

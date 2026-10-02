@@ -42,6 +42,27 @@
         "Case B stays merged despite mixed types (one outcome)",
         "Reasoning cites independent outcome, not commit, PR, domain, layer, or type labels"
       ]
+    },
+    {
+      "id": 5,
+      "target": "heading that bundles multiple independent outcomes signals a bundled item",
+      "input": "Draft Work Item titled 'Stabilizing Git test environment, dead-code tooling, E2E menu, and smoke invitation payload' covering four isolated fixes.",
+      "assertions": [
+        "The heading enumerating four outcomes triggers acceptance test 19 bundling detection",
+        "The item is split so each heading matches its own evidence scope",
+        "No single heading claims a broader umbrella change ('test infrastructure stabilization') than any one fix supports"
+      ]
+    },
+    {
+      "id": 6,
+      "target": "cross-cutting dependency migration judged by outcome independence, not type",
+      "input": "Evidence: a navigation-rail redesign PR also migrates the icon library to Tabler 3.31.0, removing lucide-react.",
+      "assertions": [
+        "The migration triggers the boundary review as a different engineering type",
+        "If the migration serves only the rail redesign's visual consistency it may stay in that item with that evidenced rationale",
+        "If the shell-wide icon-system change is independently meaningful to the reader it becomes its own Work Item",
+        "Splitting or keeping is decided by outcome independence, never by implementation type alone"
+      ]
     }
   ]
 }

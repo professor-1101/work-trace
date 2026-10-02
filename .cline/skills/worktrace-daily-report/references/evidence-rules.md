@@ -61,6 +61,16 @@ evidence supports — no stronger. "UI blocks invalid relationship selection" mu
 not become "the system prevents invalid relationships"; "tests cover the flow"
 must not become "quality is guaranteed".
 
+**Claimed bases and sources are evidence-bound too.** If the report states that an
+implementation was based on, rebuilt from, or aligned with a design document,
+specification, approved decision, RFC, or similar source artifact, repository
+evidence must actually establish that relationship (the artifact exists in the
+evidence and demonstrably drives the change). Never invent or infer the authority,
+basis, or source of an implementation. When no evidenced basis exists, describe
+what the code does and what state the repository ended in — drop the claimed
+source entirely. This applies equally to revert narratives: "rewritten from the
+approved design" is forbidden unless the approved design is in the evidence.
+
 **No forced business framing**: do not push every Work Item into Quality / Speed /
 Cost / Risk-Reduction categories, do not require a KPI or metric for a refactor,
 and do not quantify impact when no quantified evidence exists.
@@ -85,7 +95,14 @@ the change means at the system level — it is not business value.
 
 Without evidence, never write: reliable, secure, stable, significant, substantial,
 important, optimized, performant, successful, complete, "guaranteed quality",
-"markedly improved". Report behavior or evidence instead.
+"markedly improved". Claim strength must never exceed the evidence: guarantee and
+completeness verbs ("guarantees", "ensures that ... without problems", "fully
+stable") require evidence that actually demonstrates the guarantee — tests,
+verified behavior, or enforced constraints in the diff. Otherwise report the
+mechanism and its evidenced effect: BAD: "this guarantees historical data reads
+without problems" -> GOOD: "stored states remain readable because the read path
+bypasses the new creation validation" (behavior, no absolute claim). Report
+behavior or evidence instead.
 
 - BAD: "System security improved."
 - GOOD: "Access to Settings is gated by the `MANAGE_PROJECT` capability, and the guard
