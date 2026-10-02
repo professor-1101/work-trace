@@ -1,0 +1,109 @@
+{
+  "skill_name": "worktrace-daily-report",
+  "notes": "Behavior evaluations for the Persian language layer (references/persian-output.md). Assertions check terminology decisions, protected spans, naturalness, and claim fidelity -- not dictionary coverage. Mechanics assertions are objectively checkable; craft assertions are judgment-based, mirroring the source projects' evaluation philosophy.",
+  "evals": [
+    {
+      "id": 1,
+      "target": "established loanword stays a loanword",
+      "input": "English internal draft: 'The dead-code checker was hardened so a ts-prune failure stops the run with a non-zero exit code instead of being read as empty output.' Requested report language: Persian.",
+      "assertions": [
+        "'dead-code' is rendered with the established practitioner form (دِدکد or dead-code), not a purist coinage such as 'کد مردهٔ بلااستفاده'.",
+        "'hardened' appears as هاردن شد or a precise verb phrase; it is NOT softened into 'بهتر شد' and not forced into an literary coinage.",
+        "`ts-prune` remains verbatim in Latin script inside backticks.",
+        "No bureaucratic construction ('انجام پذیرفت', 'مورد ... قرار گرفت') appears.",
+        "The engineering claim is unchanged: failure -> non-zero stop, previously misread as empty."
+      ]
+    },
+    {
+      "id": 2,
+      "target": "term should remain in English / Latin script",
+      "input": "Internal fact: 'Smoke payloads now match the invite API schema, but the flow still fails with 404 USER_NOT_FOUND on a fresh database because generated identities have no accounts.'",
+      "assertions": [
+        "`404 USER_NOT_FOUND` is preserved exactly, untransliterated, inside backticks.",
+        "'smoke' and 'schema' stay as established technical terms (اسموک/schema or equivalent practitioner forms), not translated into literary Persian.",
+        "The limitation sentence remains explicit; smoothing does not drop the blocker."
+      ]
+    },
+    {
+      "id": 3,
+      "target": "genuine translation where context demands it",
+      "input": "Internal fact: 'Stored states remain readable after creation-time validation was tightened; the read path moved to reconstitute.'",
+      "assertions": [
+        "'read path' is rendered naturally (e.g., مسیر خواندن) rather than calqued as 'مسیر رید'.",
+        "`reconstitute` remains verbatim as an identifier.",
+        "The sentence reads as originally-Persian S-O-V, not English clause order."
+      ]
+    },
+    {
+      "id": 4,
+      "target": "same source word, two semantic roles",
+      "input": "Two facts in one report: (a) 'the matrix supports Requirement rows'; (b) 'the value support column must accept nulls'.",
+      "assertions": [
+        "(a) renders 'supports' as پشتیبانی/امکان‌دادن (capability role).",
+        "(b) renders 'support' differently (نگه‌داشتن/ذخیره کردن, data role) -- no single fixed mapping applied to both.",
+        "Neither occurrence is mistranslated by copying the other's choice."
+      ]
+    },
+    {
+      "id": 5,
+      "target": "identifier protection",
+      "input": "Persian draft containing: 'خطای INVALID_CHANGE_SET_ARTIFACT_STATE در زمان create برای UNCHANGED با دو snapshot برگردانده می‌شود؛ فایل `ChangeSet.ts` و پوشه entities/trace نیز اصلاح شدند.'",
+      "assertions": [
+        "`INVALID_CHANGE_SET_ARTIFACT_STATE`, `create`, `UNCHANGED`, `snapshot`, `ChangeSet.ts`, and `entities/trace` are all byte-identical to the input.",
+        "No punctuation or letter normalization touches characters inside identifiers.",
+        "Prose around them is naturalized without altering the exact strings."
+      ]
+    },
+    {
+      "id": 6,
+      "target": "technically correct but machine-translated sentence",
+      "input": "Translationese sample to fix: 'این امر به منظور فراهم کردن امکان مشاهدهٔ پوشش، مورد استفاده از یک نمای جدید قرار گرفت و توسط تیم توسعه انجام پذیرفت.'",
+      "assertions": [
+        "'این امر' subject calque is removed or replaced by naming the thing.",
+        "'مورد استفاده ... قرار گرفت', 'انجام پذیرفت' and 'توسط' constructions are gone; simple verbs used.",
+        "'به منظورِ' reduced to 'برای' or dropped.",
+        "Meaning preserved: a new view makes coverage observable; nothing added about the team beyond the source."
+      ]
+    },
+    {
+      "id": 7,
+      "target": "artificial synonym cycling",
+      "input": "Report mentions the same concept three times, drafted as 'پلتفرم', then 'سامانه', then 'وب‌گاه' for one identical referent.",
+      "assertions": [
+        "One stable term is used for the concept across all occurrences.",
+        "Variation introduced only to avoid repetition is collapsed.",
+        "Consistency does not override meaning change (if a later occurrence means something else, a different rendering is allowed)."
+      ]
+    },
+    {
+      "id": 8,
+      "target": "Persian equivalent exists but is unnatural for engineers",
+      "input": "Internal fact: 'Test coverage percentage is displayed per capability and feature.' A candidate rendering uses a purist coinage for 'test case'.",
+      "assertions": [
+        "The output prefers the practitioner forms actually used in Iranian engineering teams (e.g., تست / کاوراژ or the most common domain form).",
+        "It does not introduce a coinage that would send the reader to a dictionary.",
+        "If an uncommon-looking Persian equivalent is genuinely standard in the field (e.g., پایگاه داده for database), using it is also acceptable -- the test is field usage, not purity."
+      ]
+    },
+    {
+      "id": 9,
+      "target": "naturalization without changing engineering meaning",
+      "input": "Draft sentence with scope qualifier: 'فرم افزودن لینک فقط tripleهای مجاز را نشان می‌دهد و ایجاد روابط نامعتبر را در UI مسدود می‌کند.' A smoother rewrite proposes: 'ایجاد رابطهٔ نامعتبر دیگر ممکن نیست.'",
+      "assertions": [
+        "The smoother rewrite is rejected: it widens a UI-scoped claim to a system-wide claim.",
+        "'در UI' (or an equally precise scope marker) survives the language pass.",
+        "The editorial pass may rephrase everything else freely but leaves the claim strength identical."
+      ]
+    },
+    {
+      "id": 10,
+      "target": "mechanics vs judgment separation",
+      "input": "Final Persian report text containing Arabic-script lookalikes and missing ZWNJ: 'مي‌باشد كتاب‌ها را بررسي كنيد' plus a Latin version string 'v3.31.0'.",
+      "assertions": [
+        "Mechanics fixed deterministically: ي->ی, ك->ک, نیم‌فاصله restored, spacing normalized.",
+        "'v3.31.0' digits remain Latin (protected span).",
+        "'مي‌باشد' is flagged as officialese (judgment layer) and rewritten to 'است'/'هستند' -- the mechanics layer alone must not silently reword it."
+      ]
+    }
+  ]
+}

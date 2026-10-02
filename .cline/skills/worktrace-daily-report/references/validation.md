@@ -65,7 +65,7 @@ pairs two different snapshots is rejected at creation time."
 | 15 | Revert | Reverted implementation reported as final accomplishment |
 | 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 | 17 | Approved Rules | Item violates RULE-01..RULE-04 as specified in approved-rules.md (activity metrics, untranslated internal identifiers, missing evidence-supported system meaning, or detail-noise misselection), including their exceptions |
-| 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, transliterated or altered identifiers/commands/error codes, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، or inconsistent rendering of one concept. Run the language-only editorial pass in persian-output.md; this test must never alter an engineering claim |
+| 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, an invented coinage no field uses, transliterated or altered identifiers/commands/error codes inside protected spans, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، AI-style clusters, or inconsistent rendering of one concept. Run the four-check language-only editorial pass (terminology / naturalness / fidelity / mechanics) in persian-output.md; this test must never alter an engineering claim |
 
 ## Reject patterns (distilled)
 

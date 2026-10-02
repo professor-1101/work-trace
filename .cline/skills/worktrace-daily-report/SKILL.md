@@ -197,15 +197,19 @@ metadata; use plain Markdown only.
 **For Persian reports**, load [references/persian-output.md](references/persian-output.md)
 before drafting prose and again before delivering. Core stance: write as a
 Persian-speaking software engineer would — translate meaning and sentence
-structure, never words; select terminology contextually (established engineering
-loanwords are preferred over forced literary or dictionary-derived Persian;
-English terms, acronyms, identifiers, commands, error codes, and version strings
-stay verbatim in Latin script when that is natural); keep consistency without
-synonym-cycling for variety; strip translationese at sentence level (calqued
-English syntax, bureaucratic constructions, excessive nominalization). Naturalness
-never changes an engineering claim: scope qualifiers and precision outrank
-fluency. After the engineering self-check passes, run the separate language-only
-editorial pass defined there.
+structure, never words; select terminology contextually by asking what the
+engineering field itself writes (a Persian equivalent is used only when it is at
+least as clear to the reader as the term it replaces — established engineering
+loanwords are preferred over forced literary or dictionary-derived Persian, and
+never invent a rendering you have not seen practitioners use); English terms,
+acronyms, identifiers, commands, error codes, and version strings stay verbatim
+in Latin script inside protected spans; keep consistency without synonym-cycling
+for variety; strip translationese at sentence level (bureaucratic verbs, calqued
+function words, English-shaped syntax, AI-style clusters); keep deterministic
+orthographic mechanics separate from judgment decisions. Naturalness never changes
+an engineering claim: scope qualifiers and precision outrank fluency. After the
+engineering self-check passes, run the separate language-only editorial pass
+defined there (terminology / naturalness / fidelity / mechanics).
 
 ## Step 5 — Self-check before delivering
 
@@ -239,7 +243,13 @@ engineering claim). Deliver only when every dimension passes.
   language policy: contextual terminology decisions, translationese removal,
   precision guardrails, final language-only editorial pass. Load only for Persian
   output.
+- [references/ATTRIBUTION.md](references/ATTRIBUTION.md) — provenance and
+  licensing notes for the principles behind the Persian language layer. Read only
+  when redistributing the skill package.
 - [assets/report-template.md](assets/report-template.md) — exact output skeleton.
+- `evals/persian-language-evals.json` — behavior evaluations for the Persian
+  language layer; run when the language policy changes. Not loaded during normal
+  report generation.
 
 ## Scope (neutrality)
 
