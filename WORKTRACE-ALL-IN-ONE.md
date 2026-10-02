@@ -111,7 +111,9 @@ Extract Status / Limitation    (only when supported — never hide one)
         v
 Write Concise Narrative        (format + language rules below)
         v
-Validate Against Evidence      (run all 20 acceptance tests — see Step 5)
+Grouping Re-audit              (final split/merge pass before report output — see Step 1)
+        v
+Validate Against Evidence      (run all 21 acceptance tests — see Step 5)
         v
 Daily Engineering Report
 ```
@@ -153,7 +155,9 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   independence, never by implementation type alone.
 - **Merge commits** are not independent accomplishments; they carry evidence for the
   work they merged. Never duplicate that work into a second item.
-- **Reverts**: do not require every revert to appear in the report. Mention a
+- **Reverts**: do not require every revert to appear in the report, and never make
+  an item open with its revert history by default — the result leads, revert
+  context follows only when it earns its place. Mention a
   revert only when it materially explains the final outcome, the current state, a
   meaningful limitation, or why the resulting implementation differs from an
   earlier attempt; a revert existing in Git history is not by itself report-worthy.
@@ -182,6 +186,16 @@ Work Item; `add feature X` plus `fix unrelated database issue` are two.
   unsupported placeholder content. If an extracted Work Item has no defensible
   engineering outcome or sufficient evidence, omit it entirely. This is an output
   quality requirement, not a mandate for any specific validator technology.
+- **Final split/merge re-audit before report output**: after drafting the narrative
+  and before delivering the report, re-audit every Work Item boundary once more —
+  the grouping decision from earlier steps is not final until this pass clears it.
+  For each item ask: does it still contain exactly one independent, meaningful
+  outcome (nothing that should be split out), and is there any other item whose
+  outcome is actually the same outcome reported twice (nothing that should be
+  merged)? Shared purpose, domain, or context alone never justifies merging;
+  multiple implementation steps of one outcome alone never justify splitting.
+  Re-auditing may retitle headings to match re-scoped items. Fix every boundary
+  that fails, then run the acceptance tests on the corrected items.
 
 ### Approved rule set (canonical source of truth)
 
@@ -216,7 +230,10 @@ business outcome; a design/planning reference with system context.
 Detail selection follows **RULE-04**: retain technical detail that materially
 explains behavior, constraints, architecture, security boundaries, performance
 characteristics, public contracts, or validation; filter out low-level noise,
-routine syntax edits, and refactoring clutter. Do not over-correct the
+routine syntax edits, and refactoring clutter. Order inside an item stays
+outcome/capability -> relevant technical detail: a mechanism such as `ARIA grid` or
+`ELK` never leads or dominates the item unless it is materially important to the
+outcome. Do not over-correct the
 vocabulary: keep technical terms that carry meaning for a technical reader (API,
 E2E, Integration Test, RBAC, Database, Graph, Baseline, Traceability,
 Architecture). The goal is not "simplify everything" — it is **remove
@@ -261,7 +278,25 @@ writing any sentence that claims a *why*, an *impact*, or a
   selected-cell write operations"; implementation detail may follow when it adds
   useful technical meaning. This is an ordering preference, not a rigid sentence
   template: lead with the mechanism only when the mechanism itself is the
-  outcome's meaning (e.g., isolation, layout shape, a contract change).
+  outcome's meaning (e.g., isolation, layout shape, a contract change). An
+  implementation mechanism (`ARIA grid`, `ELK`, a rendering strategy) must not
+  lead or dominate an item — title, opening sentence, and bulk of the narrative —
+  unless it is materially important to understanding the outcome; when material,
+  it still comes after the outcome statement, not before it.
+- **Outcome framing without formulas**: open items with the natural result of the
+  work — what exists, works, or became possible now — phrased the way an engineer
+  would state it. Do not fall back on formulaic openings such as «قابلیت X پیاده‌سازی
+  شد» ("the X capability was implemented") that announce implementation without
+  adding information beyond the title; say what the capability does or what changed
+  instead. This bans the reflex, not a word: there is no mandatory sentence
+  template, and when plain delivery wording genuinely carries the evidence (a new
+  view really was built), ordinary direct phrasing is fine.
+- **Sentence rhythm**: when adjacent sentences describe similar changes (parallel
+  fixes, repeated feature constructions), vary their structure and length so the
+  report does not read as one template refilled — avoid consecutive sentences with
+  identical openings, mirrored clause shapes, or uniform cadence. Vary naturally,
+  driven by what each sentence actually says; never swap in synonyms or restructure
+  merely for variety, and never alter a claim while reshaping its sentence.
 - **Sentence-utility rule**: every sentence must deliver at least one of Context /
   Engineering Work / Outcome / System Significance / Evidence / Status-Limitation.
   If a sentence delivers none of these, remove it.
@@ -293,11 +328,17 @@ structure, never words; select terminology contextually by asking what the
 engineering field itself writes (a Persian equivalent is used only when it is at
 least as clear to the reader as the term it replaces — established engineering
 loanwords are preferred over forced literary or dictionary-derived Persian, and
-never invent a rendering you have not seen practitioners use); English terms,
+never invent a rendering you have not seen practitioners use); resolve an
+ambiguous technical term's actual domain meaning from the code's behavior before
+rendering it, keeping lifecycle distinctions (retire, delete, archive, deactivate)
+semantically separate; English terms,
 acronyms, identifiers, commands, error codes, and version strings stay verbatim
-in Latin script inside protected spans; keep consistency without synonym-cycling
+in Latin script inside protected spans — including observed error codes inside a
+limitation, which must not be smoothed into vague wording; keep consistency without synonym-cycling
 for variety; strip translationese at sentence level (bureaucratic verbs, calqued
-function words, English-shaped syntax, AI-style clusters); keep deterministic
+function words, English-shaped syntax, AI-style clusters, formulaic «قابلیت X
+پیاده‌سازی شد» openings, uniform cadence across adjacent sentences — all judged as
+recurring pattern-level signals, never word-level blacklists); keep deterministic
 orthographic mechanics separate from judgment decisions. Naturalness never changes
 an engineering claim: scope qualifiers and precision outrank fluency. After the
 engineering self-check passes, run the separate language-only editorial pass
@@ -305,13 +346,15 @@ defined there (terminology / naturalness / fidelity / mechanics).
 
 ### Step 5 — Self-check before delivering
 
-Run every Work Item through the 20 acceptance tests, both Definitions of Done
+Run every Work Item through the 21 acceptance tests, both Definitions of Done
 (Work Item + Daily Report), and the PASS/FAIL scorecard in
 [references/validation.md](references/validation.md); test 17 checks each Work
 Item against RULE-01..RULE-04 as specified in
 [references/approved-rules.md](references/approved-rules.md), test 19 checks
-each heading for scope proportionality against its evidence, and test 20 checks
-that claimed bases/sources of an implementation are evidenced artifacts. Fix anything that
+each heading for scope proportionality against its evidence, test 20 checks
+that claimed bases/sources of an implementation are evidenced artifacts, and
+test 21 runs the final split/merge grouping re-audit across all items before
+report output. Fix anything that
 fails; if a claim cannot be defended from the evidence, remove or downgrade the
 claim — never invent support for it. **For Persian output, then run the separate
 language-only editorial pass in
@@ -330,7 +373,7 @@ engineering claim). Deliver only when every dimension passes.
   precision, test-vs-claim limit, status vocabulary, risk discipline.
 - [references/reader-model.md](references/reader-model.md) — terminology classes,
   internal-reference handling, independence rule, style tables, reader tests.
-- [references/validation.md](references/validation.md) — DODs, 20 acceptance tests,
+- [references/validation.md](references/validation.md) — DODs, 21 acceptance tests,
   reject patterns, scorecard.
 - [references/patterns.md](references/patterns.md) — worked BAD:/GOOD: examples per pattern.
 - [references/persian-output.md](references/persian-output.md) — Persian report
@@ -665,6 +708,12 @@ execution against a fresh database reaches `404 USER_NOT_FOUND` because the crea
 identities have no accounts; continuing this flow requires creating matching
 accounts."
 
+Keep that example's shape in every limitation you report: the observed error code
+and failed check stay in the sentence verbatim. Do not weaken evidence-rich
+limitations into vague wording ("some issues remain", "the flow is not fully
+stable"), and do not let the smoothing pass drop the concrete signal — the claim
+must not exceed the evidence, and it must not fall below it either.
+
 Never represent incomplete work as completed delivery. When ongoing work is
 materially relevant, anchor its status to concrete technical evidence — completed
 schema or migration work, implemented API behavior, passing relevant tests,
@@ -683,6 +732,15 @@ percentage-complete claims ("70% done", "mostly finished").
   Preserve the actual scope of the evidence: if evidence only shows that a UI
   interaction blocks an invalid relationship, do not generalize that into a
   system-wide or database-level integrity guarantee.
+- **Preserve concrete observed evidence**: error codes (`404 USER_NOT_FOUND`,
+  `INVALID_CHANGE_SET_ARTIFACT_STATE`), failed checks, exit codes, and rejected
+  inputs captured in the evidence are part of the limitation's content — keep them
+  verbatim (Latin script, protected spans) instead of smoothing them into vague
+  wording ("some issues remain", "the flow does not fully work"). A limitation
+  stated with its observed signal is both more accurate and more actionable;
+  naturalization never justifies diluting it. The bound runs one way only: keep the
+  evidence as strong as it is, and no stronger — never extend a recorded error code
+  into an unobserved cause, severity, or system-wide conclusion.
 - Abandoned prototypes/spikes are reported as what was attempted, what finding or
   limitation was established, and the final repository state — not automatically
   as "risk reduction" unless the evidence genuinely supports that framing.
@@ -829,6 +887,27 @@ not accounts.
   against Test Cases and link or retire relationships directly from a selected
   cell; the grid follows the ARIA grid pattern for accessibility." (mechanism kept
   only because accessibility is part of the outcome)
+- The rule generalizes to any mechanism (`ELK`, a rendering strategy, a state
+  machine): outcome/capability first, relevant technical detail after; the
+  mechanism may lead only when it materially *is* the outcome's meaning.
+
+### P14 - Outcome framing without formulas
+
+- BAD: "The Design Coverage capability was implemented." («قابلیت Design Coverage
+  پیاده‌سازی شد» — announces implementation, adds nothing beyond the title)
+- GOOD: "Coverage status now appears per Requirement inside the tree, computed from
+  linked Test Cases." (states what works now)
+- No fixed template replaces the formula: plain direct wording ("a new view was
+  built") stays fine when that is exactly what the evidence shows.
+
+### P15 - Varied rhythm across parallel sentences
+
+- BAD: three adjacent items each opening "X was fixed…", "Y was fixed…", "Z was
+  fixed…" with identical clause shape for similar fixes.
+- GOOD: reshape according to what each sentence actually says — one names the
+  failing check, the next leads with the behavior restored, another is short.
+- Variation comes from content, not synonym cycling; claims stay byte-faithful in
+  meaning while their sentences change shape.
 
 ---
 
@@ -925,11 +1004,15 @@ Do not build or rely on long prohibited-word lists; apply these five questions.
 **Meaning before translation for abstract verbs and concepts.** For terms like
 retire, frozen, captured, archive, publish: never map the English token to a fixed
 Persian word. First determine what operation or state the software actually means
-in this context (a link retired = deactivating an active relationship; a set
-captured at publish = recorded/persisted into the baseline), then express that
+in this context — resolve the term's real domain meaning from the code's behavior
+before rendering it (a link retired = deactivating an active relationship; a set
+captured at publish = recorded/persisted into the baseline) — then express that
 meaning with established practitioner terminology or a natural functional
-description. The same English concept may legitimately render differently across
-domains (graph relationships vs release baselines vs document lifecycle). This
+description. Resolve ambiguity by evidence, never by picking a favorite Persian
+word: if retire/delete/archive/deactivate cannot be told apart from the evidence,
+keep the source term rather than guessing a rendering. The same English concept may
+legitimately render differently across domains (graph relationships vs release
+baselines vs document lifecycle). This
 procedure replaces any word-level mapping rule; no `retire -> X` or
 `frozen -> Y` table exists in this skill, and none should be inferred from
 examples. **Lifecycle operations stay semantically distinct.** retire, delete,
@@ -961,7 +1044,21 @@ engineering evidence did not contain):
   piled connectors (همچنین / علاوه بر این / از سوی دیگر opening consecutive
   sentences), «نه تنها … بلکه …» recurring, rule-of-three adjective lists, uniform
   sentence length, closing-summary paragraphs, announcement fillers (لازم به ذکر
-  است، شایان ذکر است، در نهایت).
+  است، شایان ذکر است، در نهایت). Treat these as recurring pattern-level signals —
+  one ordinary «همچنین» is not a violation; the tell is repetition and clustering.
+  Do not compile them into word-level blacklists: remove the construction's grip on
+  the paragraph, not a specific word from the language.
+- Formulaic outcome announcements in Persian reports — «قابلیت X پیاده‌سازی شد» style
+  openings that declare implementation without saying what now works or became
+  possible. They duplicate the heading and read as machine output; open with the
+  natural result instead. This is a framing reflex to catch, not a banned phrase
+  and not a replacement sentence template.
+- Repetitive adjacent-sentence shape: several nearby sentences describing similar
+  changes all starting the same way («… اضافه شد», «… اصلاح شد»), mirroring one
+  clause structure, or running to identical length. Reshape so parallel content
+  reads with varied rhythm; vary because the sentences genuinely differ, never by
+  inserting synonyms for mere variety (see section 2 on consistency) and never
+  while touching the claim itself.
 - Excessive nominalization: stacking ezafe chains where a verb would move
   («انجام فرآیند مهاجرت تنظیمات» -> «تنظیمات migrate شد»).
 - Literal collocations that exist only as shadows of English idioms.
@@ -1020,6 +1117,12 @@ Naturalness is bounded by fidelity:
 - Keep every scope qualifier exactly (در سطح UI، در زمان creation) even when a
   shorter phrasing would flow better. A smoother sentence that widens a claim is
   a failed sentence.
+- **Preserve concrete observed evidence.** Error codes, failed checks, and rejected
+  inputs captured in the repository evidence (`404 USER_NOT_FOUND`, exit codes) are
+  part of the limitation's content: keep them verbatim in Latin script instead of
+  smoothing them into vague wording («مشکلاتی باقی است»). Naturalness never justifies
+  weakening an evidence-rich limitation; it also never licenses extending the
+  recorded signal into an unobserved cause or a broader conclusion.
 - Do not convert behavior descriptions into evaluations while smoothing them
   («مسدود می‌کند» must not become «امن می‌کند»).
 - Technical accuracy outranks elegance: a capability check is access-control, not
@@ -1044,8 +1147,11 @@ independent checks, then mechanics last:
    literal dictionary translations of abstract technical concepts, flattened
    lifecycle distinctions, English-shaped names/calls calques, redundant
    Persian/English hybrid doubles, calqued function words, bureaucratic verbs,
-   AI-style clusters, and uniform rhythm from section 4. The test question: would a
-   senior Iranian engineer sign this sentence?
+   AI-style clusters, formulaic «قابلیت X پیاده‌سازی شد» openings, and uniform rhythm
+   or repetitive adjacent-sentence shape from section 4. Judge these as recurring
+   pattern-level signals, not word-level blacklists: a single ordinary occurrence is
+   fine, the tell is repetition and clustering. The test question: would a senior
+   Iranian engineer sign this sentence?
 3. **Fidelity.** Re-read each sentence against its engineering claim: did wording
    changes strengthen, weaken, generalize, or scope-shift anything? Did the pass add
    a fact absent from the Git evidence? Wording is free to change; claims are frozen.
@@ -1158,8 +1264,10 @@ BAD: "Changes related to Explorer" · "Work on the API" · "Several fixes in gua
 ### 5. Result-first ordering
 
 Open each item with what was built and what it enables; history (revert, prior
-attempt) comes after the result, never as the opening clause. Worked example:
-patterns.md P10.
+attempt) comes after the result, never as the opening clause. Never lead an item
+with revert history by default: mention a revert only when it materially explains
+the outcome, the current state, or a limitation — otherwise leave it out of the
+narrative entirely. Worked example: patterns.md P10.
 
 ### 6. Implementation-detail budget
 
@@ -1238,7 +1346,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-### Final acceptance tests (20; run per Work Item)
+### Final acceptance tests (21; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -1262,6 +1370,7 @@ pairs two different snapshots is rejected at creation time."
 | 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, an invented coinage no field uses, transliterated or altered identifiers/commands/error codes inside protected spans, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، AI-style clusters, or inconsistent rendering of one concept. Run the four-check language-only editorial pass (terminology / naturalness / fidelity / mechanics) in persian-output.md; this test must never alter an engineering claim |
 | 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"), OR the heading bundles multiple independent outcomes under one title ("X and Y and Z"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
 | 20 | Evidenced Basis | Report claims an implementation was based on / rebuilt from / aligned with a design, specification, approved decision, or similar source artifact that repository evidence does not establish. Fix: drop the claimed basis and describe what the code does and the final repository state |
+| 21 | Grouping Re-audit | Final split/merge pass before report output (SKILL.md Step 1): any item still bundling independently meaningful outcomes, any item split along commit/PR/domain/type/layer lines rather than outcomes, or two items reporting one outcome twice. Shared purpose, domain, or context alone never justifies merging; multiple implementation steps of one outcome alone never justify splitting. Fix boundaries, retitle affected headings, then re-run tests 14 and 19 on the corrected items |
 
 ### Reject patterns (distilled)
 
@@ -1278,7 +1387,7 @@ pairs two different snapshots is rejected at creation time."
 11. Buzzword padding.
 12. Planning terminology inside narrative; vague pointers like "new design".
 
-### Anti-pattern catalog (AP-1..26, recurring failure shapes)
+### Anti-pattern catalog (AP-1..30, recurring failure shapes)
 
 - **AP-1 Activity-only item** — counts/diffs instead of meaning. Fix: Level 2+.
 - **AP-2 Invented why** — motivation without evidence. Fix: start from work itself.
@@ -1353,6 +1462,25 @@ pairs two different snapshots is rejected at creation time."
   does not establish ("rebuilt from the approved design"). Fix: report only the
   evidenced facts — what the code does, what changed, the final repository state
   (see acceptance test 20).
+- **AP-27 Formulaic outcome opener** — starting items with a canned delivery
+  formula such as «قابلیت X پیاده‌سازی شد» ("the X capability was implemented") that
+  restates the title and adds no information. Fix: open with the natural result —
+  what exists, works, or became possible — without adopting any fixed sentence
+  template; plain direct delivery wording stays fine when it carries the evidence.
+- **AP-28 Mechanism-dominant item** — an implementation mechanism (`ARIA grid`,
+  `ELK`, a rendering strategy) leads the title/opening or fills most of the
+  narrative although the reader mainly needs the outcome. Fix: outcome/capability
+  first, relevant technical detail after; keep the mechanism leading only when it
+  materially is the outcome's meaning (see acceptance test 16, patterns.md P13).
+- **AP-29 Uniform cadence** — adjacent sentences describing similar changes repeat
+  the same opening, clause shape, or length, so the report reads as one template
+  refilled. Fix: vary structure and length naturally where content parallels; never
+  force synonym substitution merely for variety and never alter a claim while
+  reshaping its sentence.
+- **AP-30 Skipped grouping re-audit** — delivering the report straight after
+  drafting without the final split/merge boundary pass, letting bundled or
+  over-split items survive to output. Fix: run acceptance test 21 before report
+  output; correct boundaries, retitle headings, re-run tests 14 and 19.
 
 ### PASS/FAIL scorecard (final gate)
 
@@ -1360,9 +1488,11 @@ Evaluate each dimension PASS/FAIL — no numeric scores:
 
 commit-summary-free · outcome-oriented · reader-oriented · planning-jargon-free ·
 evidence-fidelity · greenfield-handling · revert-handling · limitation-visibility ·
-technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
+technical-accuracy · grouping-quality · grouping-re-audit (final split/merge pass, test 21) ·
+no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
-term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
+term-meaningfulness · capability-first · outcome-framing-natural (no formulaic openings) ·
+sentence-rhythm · no-decorative-emoji · approved-rules-compliance
 (RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
 heading-scope-proportionality · evidenced-basis · persian-naturalness (Persian output only; language-only
 pass per persian-output.md).
