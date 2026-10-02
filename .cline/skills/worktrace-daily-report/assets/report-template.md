@@ -9,9 +9,10 @@ section, no commit list, no file log. Deliver Work Items directly.
 
 ### {Outcome-oriented title — past-tense verb, no dates, no counts, no planning labels}
 
-{Integrated narrative, preferably 2–5 sentences. Order: result first → what became
-possible/different → evidence-backed context if any → status/limitation if any.
-Every sentence must deliver Context, Action, Outcome, Evidence, or Status.}
+{Integrated narrative, preferably 2–5 sentences. Order: result first -> what became
+possible/different -> evidence-backed context if any -> status/limitation if any.
+Every sentence must deliver Context, Engineering Work, Outcome, System
+Significance, Evidence, or Status/Limitation.}
 
 ### {Next independent outcome — split anything whose title would need "and"}
 

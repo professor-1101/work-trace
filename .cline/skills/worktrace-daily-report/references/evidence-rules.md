@@ -34,39 +34,48 @@ was redesigned."*
 Absence of a previous system is itself a valid context. Do not fabricate a prior
 deficiency to build a narrative.
 
-- ✅ *"To provide the ability to observe and manage X, the Y capability was designed
+- GOOD: *"To provide the ability to observe and manage X, the Y capability was designed
   and implemented."*
-- ❌ *"Because the previous system could not display X, Y was redesigned."* (when no
+- BAD: *"Because the previous system could not display X, Y was redesigned."* (when no
   previous system exists in the evidence)
 
 ## 3. Evidence-grounded, not evidence-limited
 
 Extract engineering *meaning* from evidence, but add no new facts.
 
-- Allowed inference: from "`ts-prune` failure was treated as empty output" →
+- Allowed inference: from "`ts-prune` failure was treated as empty output" ->
   "tool failure was misinterpreted as an empty result." This is legitimate technical
   inference.
-- Forbidden inference: from the same evidence → "this increased team productivity."
+- Forbidden inference: from the same evidence -> "this increased team productivity."
 
 ## 4. Never construct without direct evidence
 
 Do not invent: user complaints, customer demand, Product Owner or stakeholder
-requests, business requirements, business value, productivity or customer impact,
-a previous system / implementation / limitation, severity, urgency, importance,
-adoption, success, performance or reliability improvement, user satisfaction.
-If the evidence is absent, drop the claim.
+requests, business requirements, business value, ROI, productivity or customer
+impact, a previous system / implementation / limitation, severity, urgency,
+importance, adoption, success, performance / reliability / security improvement,
+completeness claims, user satisfaction. If the evidence is absent, drop the claim.
+
+**Strongest-supported-claim principle**: use exactly the strongest claim the
+evidence supports — no stronger. "UI blocks invalid relationship selection" must
+not become "the system prevents invalid relationships"; "tests cover the flow"
+must not become "quality is guaranteed".
+
+**No forced business framing**: do not push every Work Item into Quality / Speed /
+Cost / Risk-Reduction categories, do not require a KPI or metric for a refactor,
+and do not quantify impact when no quantified evidence exists.
 
 ## 5. System significance vs business value
 
 System significance explains what the change means at the system level — it is not
 business value.
 
-- ✅ Technical significance: "a stored state remains readable even after creation
+- GOOD: Technical significance: "a stored state remains readable even after creation
   validation was tightened"; "running Git inside specs no longer inherits the main
   repository's environment."
-- ✅ Observable capability: "coverage can now be observed directly inside the
+- GOOD: Observable capability: "coverage can now be observed directly inside the
   system."
-- ❌ Unsupported commercial claim: "this increased team productivity."
+- BAD: Unsupported commercial claim: "this increased team productivity."
 
 ## 6. No unsupported evaluation
 
@@ -74,8 +83,8 @@ Without evidence, never write: reliable, secure, stable, significant, substantia
 important, optimized, performant, successful, complete, "guaranteed quality",
 "markedly improved". Report behavior or evidence instead.
 
-- ❌ "System security improved."
-- ✅ "Access to Settings is gated by the `MANAGE_PROJECT` capability, and the guard
+- BAD: "System security improved."
+- GOOD: "Access to Settings is gated by the `MANAGE_PROJECT` capability, and the guard
   covers the no-capability case."
 
 ## 7. Verb-scope precision (evidence-level accuracy)
@@ -93,7 +102,7 @@ the scope the evidence supports.
   rendering rules are applied *through* it. Prefer "display rules for link
   direction, legacy style, and retired links are applied in rendering."
 - **Terminology accuracy**: a capability/permission check is authorization, not
-  authentication. ❌ "removed when authentication is missing" → ✅ "hidden when the
+  authentication. BAD: "removed when authentication is missing" -> GOOD: "hidden when the
   capability is absent."
 
 ## 8. Test evidence — coverage is not a grander claim

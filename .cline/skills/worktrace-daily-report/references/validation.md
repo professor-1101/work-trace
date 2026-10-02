@@ -44,7 +44,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-## Final acceptance tests (run per Work Item)
+## Final acceptance tests (16; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -56,15 +56,16 @@ pairs two different snapshots is rejected at creation time."
 | 6 | Status | Incomplete work presented as complete |
 | 7 | Duplication | Merge/revert/duplicate created repeated reporting |
 | 8 | Language | Vague, promotional, corporate wording |
-| 9 | Sentence Utility | A sentence delivers none of Context/Action/Outcome/Evidence/Status |
+| 9 | Sentence Utility | A sentence delivers none of Context/Work/Outcome/Significance/Evidence/Status |
 | 10 | Verb Scope | prevents/guarantees/ensures/improves exceed evidence scope |
 | 11 | Terminology Accuracy | Wrong concept word (e.g., capability check called authentication) |
 | 12 | Term Meaningfulness | Repo-specific term used with no plain gloss |
 | 13 | Internal Reference | Phase/ticket/PR/planning label in narrative |
 | 14 | Grouping | Two independent outcomes merged |
 | 15 | Revert | Reverted implementation reported as final accomplishment |
+| 16 | Capability First | Mechanism leads the item where the capability alone would inform the reader better |
 
-## Reject patterns (§39 distilled)
+## Reject patterns (distilled)
 
 1. Paraphrasing a commit ("Explorer was added").
 2. Reporting activity only ("17 files changed").
@@ -79,7 +80,7 @@ pairs two different snapshots is rejected at creation time."
 11. Buzzword padding.
 12. Planning terminology inside narrative; vague pointers like "new design".
 
-## Anti-pattern catalog (AP-1..12, recurring failure shapes)
+## Anti-pattern catalog (AP-1..16, recurring failure shapes)
 
 - **AP-1 Activity-only item** — counts/diffs instead of meaning. Fix: Level 2+.
 - **AP-2 Invented why** — motivation without evidence. Fix: start from work itself.
@@ -101,6 +102,15 @@ pairs two different snapshots is rejected at creation time."
   result-first.
 - **AP-12 Bare jargon** — `captured set`, `reconstitute` unexplained. Fix: gloss on
   first use.
+- **AP-13 Mechanism-first narrative** — ARIA grid / selected-cell ops lead instead of
+  the capability. Fix: capability first, mechanism after if it adds meaning.
+- **AP-14 Forced "why"** — every item gets a manufactured motivation. Fix: start
+  from the engineering work when no rationale is evidenced.
+- **AP-15 Forced business framing / metric** — Quality/Speed/Cost/Risk bucket or KPI
+  attached without evidence. Fix: report observable capability; no quantification
+  unless the evidence quantifies.
+- **AP-16 False completion** — partial/blocked work asserted as done. Fix: explicit
+  status line; never claim completeness the evidence does not support.
 
 ## PASS/FAIL scorecard (final gate)
 
@@ -110,6 +120,6 @@ commit-summary-free · outcome-oriented · reader-oriented · planning-jargon-fr
 evidence-fidelity · greenfield-handling · revert-handling · limitation-visibility ·
 technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
-term-meaningfulness.
+term-meaningfulness · capability-first · no-decorative-emoji.
 
-Any single FAIL → fix the item and re-run affected tests. Deliver only when all PASS.
+Any single FAIL -> fix the item and re-run affected tests. Deliver only when all PASS.
