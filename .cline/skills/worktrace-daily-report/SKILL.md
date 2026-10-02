@@ -7,8 +7,10 @@ description: >
   reader who does not know the repository (CTO / Engineering Manager). Use whenever
   the user asks for a daily engineering report, a commit summary for management,
   WorkTRACE output, or conversion of raw git evidence into an engineering narrative —
-  even if they do not explicitly say "report". The generated report language follows
-  the user's request; skill instructions are English.
+  even if they do not explicitly say "report". SKIP when the user wants a changelog,
+  release notes, or raw commit listing rather than an outcome-oriented management
+  report. The generated report language follows the user's request; skill
+  instructions are English.
 metadata:
   author: work-trace
   version: "2.0"
