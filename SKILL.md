@@ -208,7 +208,30 @@ Test decoration نیست؛ اگر بخشی از outcome است ذکر شود، �
 
 **Preferred (Context→Change→Outcome→Evidence):** «stateهای ذخیره‌شده باید پس از سخت‌ترشدن validation creation همچنان قابل خواندن باقی می‌ماندند. برای جداسازی این دو مسیر، mapper به `reconstitute` منتقل شد و `create` برای `UNCHANGED` با دو snapshot متفاوت خطای مشخص برمی‌گرداند؛ round-trip و domain test نیز رفتار read و write را پوشش می‌دهند.»
 
-## Step 9 — Self-Check قبل از خروجی
+## Step 9 — Reader Model و Internal References (الزامی)
+
+**Reader Model:** گزارش برای **خواننده** نوشته می‌شود، نه Repository. خواننده را چنین فرض کن: CTO / Engineering Manager که پروژه را می‌شناسد اما در جزئیات implementation، Git history، planning داخلی و نام‌گذاری داخلی پروژه حضور نداشته است. او باید بدون دانش قبلی از repo بفهمد: چه چیزی ساخته/اصلاح شده؟ چه capability یا behaviorی ایجاد شده؟ چرا (فقط با evidence)؟ معنای سیستمی تغییر چیست؟ کار complete است یا limitation/blocker/follow-up دارد؟
+
+**Internal References ≠ Context.** هر reference داخلی که فقط برای اعضای پروژه معنی دارد، نباید به‌عنوان context اصلی narrative استفاده شود: `Phase 2.5`، `U2/U3/U4`، `P5-812`، `PR #143`، ticket IDs، branch names، codenameهای داخلی، planning labels، agent-specific terminology، milestoneهای داخلیِ بدون توضیح. این‌ها نهایتاً metadata/audit هستند، نه narrative.
+
+**Rule** — اگر عبارتی برای فهم گزارش نیازمند دانش داخلی repo است: (1) حذفش کن، یا (2) به system-level meaning تبدیلش کن، یا (3) فقط نگه دار اگر برای reader self-explanatory است.
+
+هر reference را هنگام نوشتن در یکی از سه دسته قرار بده:
+| دسته | تعریف | مثال | رفتار |
+|---|---|---|---|
+| A. Self-explanatory | بدون repository context برای reader فنی قابل فهم | API، Database، E2E Test، Integration Test، Requirement، Test Case، Repository، CI، Migration | بماند |
+| B. Internally meaningful but externally opaque | برای تیم معنی دارد، برای reader نه | Phase 2.5، U3، P5-812، PR #143 | در narrative استفاده نشود مگر explicit translation به system meaning |
+| C. Essential proper noun | نام واقعی یک capability/product/subsystem که خودش بخشی از سیستم است | Traceability Matrix، Specification Explorer، Design Coverage | حفظ شود |
+
+مثال: ❌ «ماتریس و گراف Traceability بر اساس Phase 2.5 پیاده‌سازی شدند.» → ✅ «گراف و ماتریس Traceability برای مشاهده و مدیریت روابط Requirement و Test Case پیاده‌سازی شدند.»
+
+**Independent Outcome Rule:** دو کار را صرفاً چون در یک روز انجام شده‌اند، به یک planning phase تعلق دارند، در یک feature area هستند یا commitهایشان پشت سر هم آمده، merge نکن. اگر outcome مستقل‌اند، Work Item مستقل بساز. مثال: «Design Coverage برای مشاهده‌ی پوشش Requirementها» و «Specification Explorer برای مدیریت hierarchy Capability/Feature/Requirement» دو outcome مستقل‌اند و حتی با shared design source جدا می‌مانند.
+
+**No Unsupported Evaluation:** بدون evidence از «قابل‌اعتماد / امن / پایدار / چشمگیر / اساسی / مهم / بهینه / performant / موفق / کامل / بهبود قابل توجه / تضمین شد» استفاده نکن؛ به‌جای evaluation، behavior یا evidence را گزارش کن. ❌ «امنیت سیستم بهبود یافت.» → ✅ «دسترسی به Settings با capability مشخص gate شد و guard مربوطه عدم دسترسی بدون آن capability را پوشش می‌دهد.»
+
+**Reader Independence Test:** «اگر عنوان و متن را به یک CTO بدهم که هیچ‌چیز درباره‌ی Phaseها، ticketها یا planning labels نمی‌داند، آیا می‌فهمد این work چه چیزی به سیستم اضافه/اصلاح کرده؟» اگر نه → بازنویسی.
+
+## Step 10 — Self-Check قبل از خروجی
 
 ### Minimum Acceptable (حداقل هر گزارش)
 1. یک engineering change مشخص را بیان کند.
@@ -222,20 +245,23 @@ outcome مستقل و قابل تشخیص؛ عنوان outcome-oriented؛ متن
 ### Daily Report DOD (DOD-D1..14)
 تمام commitهای relevant روز بررسی شده؛ به Work Itemهای meaningful تبدیل شده؛ هر Work Item یک outcome مستقل؛ grouping درست؛ mergeها duplicate نساخته‌اند؛ revertها با history بعدی تفسیر شده‌اند؛ rationale/impact ساختگی ندارد؛ صرفاً commit summary نیست؛ خواننده می‌فهمد «چه چیزی اضافه/اصلاح شد»؛ در صورت evidence «چرا» و «چه چیزی ممکن شد» منتقل شده؛ limitationها پنهان نشده‌اند؛ سطح engineering outcome (نه file/change log)؛ بدون دانستن جزئیات repo قابل خواندن است.
 
-### Final Acceptance Tests (هر Work Item را با این ۸ تست بسنج)
+### Final Acceptance Tests (هر Work Item را با این ۱۱ تست بسنج)
 1. **What?** — engineering work مشخص است؟ اگر نه → FAIL.
 2. **Why?** — rationale با evidence منتقل شده؟ evidence هست و حذف شده → FAIL؛ evidence نیست و اختراع شده → FAIL؛ evidence نیست و حذف شده → PASS.
-3. **So What?** — بعد از تغییر چه ممکن/متفاوت شد؟ قابل استنتاج هست ولی نشان داده نشده → FAIL؛ evidence اجازه استنتاج نمی‌دهد → PASS.
-4. **Truth** — هر claim توسط evidence پشتیبانی می‌شود؟ اگر نه → FAIL.
-5. **Audience** — CTO/EM ناآشنا با repo می‌فهمد چه چیزی در چه سطحی تغییر کرده؟ اگر نه → FAIL.
-6. **Status** — کار واقعاً complete است؟ نیست و complete معرفی شده → FAIL.
+3. **So What? / Outcome** — بعد از تغییر چه ممکن/متفاوت شد؟ قابل استنتاج هست ولی نشان داده نشده → FAIL؛ evidence اجازه استنتاج نمی‌دهد → PASS.
+4. **Truth / Evidence** — هر claim توسط evidence پشتیبانی می‌شود؟ rationale و impact بر اساس evidence‌اند؟ اگر نه → FAIL.
+5. **Audience / Reader** — CTO/EM ناآشنا با repo می‌فهمد چه چیزی در چه سطحی تغییر کرده؟ اگر نه → FAIL.
+6. **Status** — کار واقعاً complete است؟ نیست و complete معرفی شده → FAIL؛ evidence ندارد و status ساخته شده → FAIL.
 7. **Duplication** — merge/revert/duplicate باعث گزارش تکراری شده؟ اگر بله → FAIL.
 8. **Language** — متن vague/تبلیغاتی/corporate شده؟ اگر بله → FAIL.
+9. **Internal Reference** — عبارت‌هایی مثل Phase، ticket، PR، U-code و planning label بی‌دلیل وارد narrative شده‌اند؟ اگر بله → FAIL (حذف یا translate به system meaning).
+10. **Grouping** — آیا دو outcome مستقل به اشتباه یکی شده‌اند؟ اگر بله → FAIL (Work Itemها را جدا کن).
+11. **Revert** — آیا implementation reverted به‌عنوان accomplishment نهایی آمده؟ اگر بله → FAIL.
 
 ### الگوهای مردود (Reject Patterns)
-فقط paraphrase کردن commit؛ فقط activity («۱۷ فایل تغییر کرد»)؛ rationale ساختگی؛ اختراع previous system؛ اختراع business impact؛ مشخص‌نکردن نتیجه («UI بازطراحی شد» بدون توضیح چه چیزی تغییر کرده); implementation detail بیش‌ازحد بدون outcome؛ پنهان‌کردن limitation؛ معرفی کار reverted به‌عنوان accomplishment؛ گزارش دوباره‌ی merge commit؛ پرکردن متن با buzzword.
+فقط paraphrase کردن commit؛ فقط activity («۱۷ فایل تغییر کرد»)؛ rationale ساختگی؛ اختراع previous system؛ اختراع business impact؛ مشخص‌نکردن نتیجه («UI بازطراحی شد» بدون توضیح چه چیزی تغییر کرده); implementation detail بیش‌ازحد بدون outcome؛ پنهان‌کردن limitation؛ معرفی کار reverted به‌عنوان accomplishment؛ گزارش دوباره‌ی merge commit؛ پرکردن متن با buzzword؛ آوردن internal planning references در narrative؛ ادغام دو outcome مستقل فقط به دلیل shared phase/day/branch؛ evaluation بدون evidence («قابل‌اعتماد/امن/چشمگیر/تضمین شد»).
 
-## Step 10 — معیار نهایی
+## Step 11 — معیار نهایی
 
 > **آیا این متن، بدون دیدن commitها، به خواننده می‌گوید چه engineering workی انجام شده و چه چیزی در سیستم در نتیجه‌ی آن تغییر کرده، بدون اینکه چیزی را از خودش ساخته باشد؟**
 
@@ -255,8 +281,9 @@ outcome مستقل و قابل تشخیص؛ عنوان outcome-oriented؛ متن
 
 0. **DOD-D1 (اجباری):** قبل از هر تحلیلی، inventory کامل commitهای relevant روز را بساز (`git log --since/--until` روی تمام branch‌های فعال + reflog/PR context). هیچ commitی بدون بررسی حذف نشود؛ این نقطه‌ی شروع الزامی است و رد شدن از آن یعنی شکست گزارش.
 1. Evidence جمع کن: messages، diffs، تغییرات فایل‌ها، تست‌ها، PR/merge context، revertها، design/architecture notes، TaskLog در صورت وجود.
-2. Commitها را طبق Step 1 به Work Item group کن (merge/revert rules را اعمال کن).
+2. Commitها را طبق Step 1 به Work Item group کن (merge/revert rules را اعمال کن)؛ طبق Independent Outcome Rule (Step 9) از ادغام دو outcome مستقل خودداری کن.
 3. برای هر Work Item لایه‌های Context→Work→Outcome→Significance→Status را **فقط از evidence** استخراج کن.
-4. گزارش را طبق قالب Step 6 و قواعد زبان Step 7 بنویس.
-5. قبل از خروجی، Step 9 (Self-Check + 8 Acceptance Tests) را اجرا و موارد مردود را بازنویسی کن.
-6. خروجی نهایی: فهرست Work Itemها با فرم `### عنوان` + پاراگراف یکپارچه؛ بدون appendices حاوی file log یا commit list مگر درخواست صریح.
+4. Internal references (Phase/ticket/PR/U-code/planning labels) را حذف یا به system-level meaning تبدیل کن (Step 9).
+5. گزارش را طبق قالب Step 6 و قواعد زبان Step 7 بنویس.
+6. قبل از خروجی، Step 10 (Self-Check + ۱۱ Acceptance Tests) را اجرا و موارد مردود را بازنویسی کن.
+7. خروجی نهایی: فهرست Work Itemها با فرم `### عنوان` + پاراگراف یکپارچه؛ بدون meta-introduction («بر اساس شواهد موجود...» و مشابه)، بدون توضیح «چه تغییراتی دادم»، بدون appendices حاوی file log یا commit list مگر درخواست صریح.
