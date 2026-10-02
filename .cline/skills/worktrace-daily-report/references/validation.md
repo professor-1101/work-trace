@@ -44,7 +44,7 @@ pairs two different snapshots is rejected at creation time."
 13. Abstraction level = engineering outcome, not file log.
 14. Readable without repo knowledge.
 
-## Final acceptance tests (20; run per Work Item)
+## Final acceptance tests (21; run per Work Item)
 
 | # | Test | FAIL condition |
 |---|------|----------------|
@@ -68,6 +68,7 @@ pairs two different snapshots is rejected at creation time."
 | 18 | Persian Naturalness (Persian output only) | Report reads as translated English: forced literary/purist Persian where engineers use the loanword, an invented coinage no field uses, transliterated or altered identifiers/commands/error codes inside protected spans, calqued English syntax, bureaucratic constructions (می‌باشد، گردید، مورد … قرار گرفت)، AI-style clusters, or inconsistent rendering of one concept. Run the four-check language-only editorial pass (terminology / naturalness / fidelity / mechanics) in persian-output.md; this test must never alter an engineering claim |
 | 19 | Heading Scope Proportionality | Work Item heading implies a broader system-level change than its evidence supports (e.g., localized test-script fixes titled as broad "test infrastructure stabilization"), OR the heading bundles multiple independent outcomes under one title ("X and Y and Z"). Fix: narrow the heading to the evidenced scope, or split the item so each heading matches its own evidence |
 | 20 | Evidenced Basis | Report claims an implementation was based on / rebuilt from / aligned with a design, specification, approved decision, or similar source artifact that repository evidence does not establish. Fix: drop the claimed basis and describe what the code does and the final repository state |
+| 21 | Grouping Re-audit | Final split/merge pass before report output (SKILL.md Step 1): any item still bundling independently meaningful outcomes, any item split along commit/PR/domain/type/layer lines rather than outcomes, or two items reporting one outcome twice. Shared purpose, domain, or context alone never justifies merging; multiple implementation steps of one outcome alone never justify splitting. Fix boundaries, retitle affected headings, then re-run tests 14 and 19 on the corrected items |
 
 ## Reject patterns (distilled)
 
@@ -84,7 +85,7 @@ pairs two different snapshots is rejected at creation time."
 11. Buzzword padding.
 12. Planning terminology inside narrative; vague pointers like "new design".
 
-## Anti-pattern catalog (AP-1..26, recurring failure shapes)
+## Anti-pattern catalog (AP-1..30, recurring failure shapes)
 
 - **AP-1 Activity-only item** — counts/diffs instead of meaning. Fix: Level 2+.
 - **AP-2 Invented why** — motivation without evidence. Fix: start from work itself.
@@ -159,6 +160,25 @@ pairs two different snapshots is rejected at creation time."
   does not establish ("rebuilt from the approved design"). Fix: report only the
   evidenced facts — what the code does, what changed, the final repository state
   (see acceptance test 20).
+- **AP-27 Formulaic outcome opener** — starting items with a canned delivery
+  formula such as «قابلیت X پیاده‌سازی شد» ("the X capability was implemented") that
+  restates the title and adds no information. Fix: open with the natural result —
+  what exists, works, or became possible — without adopting any fixed sentence
+  template; plain direct delivery wording stays fine when it carries the evidence.
+- **AP-28 Mechanism-dominant item** — an implementation mechanism (`ARIA grid`,
+  `ELK`, a rendering strategy) leads the title/opening or fills most of the
+  narrative although the reader mainly needs the outcome. Fix: outcome/capability
+  first, relevant technical detail after; keep the mechanism leading only when it
+  materially is the outcome's meaning (see acceptance test 16, patterns.md P13).
+- **AP-29 Uniform cadence** — adjacent sentences describing similar changes repeat
+  the same opening, clause shape, or length, so the report reads as one template
+  refilled. Fix: vary structure and length naturally where content parallels; never
+  force synonym substitution merely for variety and never alter a claim while
+  reshaping its sentence.
+- **AP-30 Skipped grouping re-audit** — delivering the report straight after
+  drafting without the final split/merge boundary pass, letting bundled or
+  over-split items survive to output. Fix: run acceptance test 21 before report
+  output; correct boundaries, retitle headings, re-run tests 14 and 19.
 
 ## PASS/FAIL scorecard (final gate)
 
@@ -166,9 +186,11 @@ Evaluate each dimension PASS/FAIL — no numeric scores:
 
 commit-summary-free · outcome-oriented · reader-oriented · planning-jargon-free ·
 evidence-fidelity · greenfield-handling · revert-handling · limitation-visibility ·
-technical-accuracy · grouping-quality · no-business-hallucination · no-corporate-fluff ·
+technical-accuracy · grouping-quality · grouping-re-audit (final split/merge pass, test 21) ·
+no-business-hallucination · no-corporate-fluff ·
 conciseness · system-significance · sentence-utility · verb-scope · terminology-accuracy ·
-term-meaningfulness · capability-first · no-decorative-emoji · approved-rules-compliance
+term-meaningfulness · capability-first · outcome-framing-natural (no formulaic openings) ·
+sentence-rhythm · no-decorative-emoji · approved-rules-compliance
 (RULE-01..RULE-04 incl. exceptions) · output-integrity (no empty/truncated artifacts) ·
 heading-scope-proportionality · evidenced-basis · persian-naturalness (Persian output only; language-only
 pass per persian-output.md).

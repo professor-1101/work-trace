@@ -148,6 +148,12 @@ execution against a fresh database reaches `404 USER_NOT_FOUND` because the crea
 identities have no accounts; continuing this flow requires creating matching
 accounts."
 
+Keep that example's shape in every limitation you report: the observed error code
+and failed check stay in the sentence verbatim. Do not weaken evidence-rich
+limitations into vague wording ("some issues remain", "the flow is not fully
+stable"), and do not let the smoothing pass drop the concrete signal — the claim
+must not exceed the evidence, and it must not fall below it either.
+
 Never represent incomplete work as completed delivery. When ongoing work is
 materially relevant, anchor its status to concrete technical evidence — completed
 schema or migration work, implemented API behavior, passing relevant tests,
@@ -166,6 +172,15 @@ percentage-complete claims ("70% done", "mostly finished").
   Preserve the actual scope of the evidence: if evidence only shows that a UI
   interaction blocks an invalid relationship, do not generalize that into a
   system-wide or database-level integrity guarantee.
+- **Preserve concrete observed evidence**: error codes (`404 USER_NOT_FOUND`,
+  `INVALID_CHANGE_SET_ARTIFACT_STATE`), failed checks, exit codes, and rejected
+  inputs captured in the evidence are part of the limitation's content — keep them
+  verbatim (Latin script, protected spans) instead of smoothing them into vague
+  wording ("some issues remain", "the flow does not fully work"). A limitation
+  stated with its observed signal is both more accurate and more actionable;
+  naturalization never justifies diluting it. The bound runs one way only: keep the
+  evidence as strong as it is, and no stronger — never extend a recorded error code
+  into an unobserved cause, severity, or system-wide conclusion.
 - Abandoned prototypes/spikes are reported as what was attempted, what finding or
   limitation was established, and the final repository state — not automatically
   as "risk reduction" unless the evidence genuinely supports that framing.

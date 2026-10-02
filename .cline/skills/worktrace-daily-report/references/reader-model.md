@@ -94,8 +94,10 @@ BAD: "Changes related to Explorer" · "Work on the API" · "Several fixes in gua
 ## 5. Result-first ordering
 
 Open each item with what was built and what it enables; history (revert, prior
-attempt) comes after the result, never as the opening clause. Worked example:
-patterns.md P10.
+attempt) comes after the result, never as the opening clause. Never lead an item
+with revert history by default: mention a revert only when it materially explains
+the outcome, the current state, or a limitation — otherwise leave it out of the
+narrative entirely. Worked example: patterns.md P10.
 
 ## 6. Implementation-detail budget
 

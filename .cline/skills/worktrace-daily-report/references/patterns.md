@@ -122,3 +122,24 @@ not accounts.
   against Test Cases and link or retire relationships directly from a selected
   cell; the grid follows the ARIA grid pattern for accessibility." (mechanism kept
   only because accessibility is part of the outcome)
+- The rule generalizes to any mechanism (`ELK`, a rendering strategy, a state
+  machine): outcome/capability first, relevant technical detail after; the
+  mechanism may lead only when it materially *is* the outcome's meaning.
+
+## P14 - Outcome framing without formulas
+
+- BAD: "The Design Coverage capability was implemented." («قابلیت Design Coverage
+  پیاده‌سازی شد» — announces implementation, adds nothing beyond the title)
+- GOOD: "Coverage status now appears per Requirement inside the tree, computed from
+  linked Test Cases." (states what works now)
+- No fixed template replaces the formula: plain direct wording ("a new view was
+  built") stays fine when that is exactly what the evidence shows.
+
+## P15 - Varied rhythm across parallel sentences
+
+- BAD: three adjacent items each opening "X was fixed…", "Y was fixed…", "Z was
+  fixed…" with identical clause shape for similar fixes.
+- GOOD: reshape according to what each sentence actually says — one names the
+  failing check, the next leads with the behavior restored, another is short.
+- Variation comes from content, not synonym cycling; claims stay byte-faithful in
+  meaning while their sentences change shape.
