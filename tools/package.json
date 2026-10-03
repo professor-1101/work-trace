@@ -1,0 +1,19 @@
+{
+  "name": "@worktrace/tools",
+  "version": "3.0.0",
+  "description": "Deterministic git evidence collector, validator and renderer for the WORKTRACE /report workflow. No semantic grouping or Persian generation happens here; that is the job of the existing worktrace-daily-report Skill.",
+  "type": "commonjs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "worktrace-collect": "bin/collect.js"
+  },
+  "scripts": {
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "yaml": "^2.5.0"
+  }
+}
