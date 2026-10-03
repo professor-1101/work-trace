@@ -269,8 +269,8 @@ test('v3.1 empty-day end-to-end produces an empty file', () => {
   }
 });
 
-test('v3.1 version consistency across all derived locations', () => {
-  assert.strictEqual(VERSION, '3.1.0');
+test('v3.2 version consistency across all derived locations', () => {
+  assert.strictEqual(VERSION, '3.2.0');
   assert.strictEqual(fs.readFileSync(path.join(REPO_ROOT, 'VERSION'), 'utf8').trim(), VERSION);
   assert.strictEqual(JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'tools', 'package.json'), 'utf8')).version, VERSION);
   const skill = fs.readFileSync(path.join(REPO_ROOT, '.cline', 'skills', 'worktrace-report', 'SKILL.md'), 'utf8');

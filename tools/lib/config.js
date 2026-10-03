@@ -34,6 +34,9 @@ const DEFAULTS = {
     // persist gate use these values, never hard-coded constants.
     maxTasksPerRepository: 3,
     maxSubtasksPerTask: 3,
+    // v3.2.0 audit: there is NO `dailyTotalHours` config key — the 7.5h daily
+    // ceiling is a HARD product invariant owned by tools/lib/hours.js
+    // (DAILY_TOTAL_HOURS). Setting it in worktrace.yaml is rejected below.
   },
   output: {
     layout: '{root}/YYYY/MM/DD/report.txt',
@@ -143,6 +146,12 @@ function validateAndNormalize(raw, configPath) {
         if (!Number.isInteger(n) || n <= 0) errors.push(`\`limits.${k}\` must be a positive integer.`);
         else cfg.limits[k] = n;
       }
+    }
+    // v3.2.0 audit: the 7.5h daily ceiling is a HARD product invariant and is
+    // NOT configurable. Any `limits.dailyTotalHours` key in user config — of
+    // any value, including 7.5 — is rejected loudly (never silently ignored).
+    if ('dailyTotalHours' in lim) {
+      errors.push('`limits.dailyTotalHours` is not a valid configuration key: the daily hour ceiling is a hard product invariant (total hours <= 7.5h) owned by the hours module; remove this key from your config.');
     }
   }
 

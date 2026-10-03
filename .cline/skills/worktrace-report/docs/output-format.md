@@ -34,18 +34,41 @@ Subtask Title
 {Project Name} - {Task Title}
 Subtask Title
 [canonical Work Item report, verbatim]
+
+گزارش روزانه
+{Task Title} - {hours}h
+{Task Title} - {hours}h
 ```
 
 Concrete shape rules enforced by the renderer/validator:
 
 - Task heading line = `{Project} - {Task Title}`; the project name appears ONLY
-  on this line, never on subtask titles.
+  on this line, never on subtask titles. Manual-only unscoped entries render a
+  bare Task heading (no fake project prefix is ever invented).
 - Subtask block = title line, blank line, report paragraph(s) — report text is
-  byte-identical to the canonical Work Item report.
-- Blocks inside a Task separated by one blank line; Tasks separated by a line
-  containing only `---` with blank lines around it.
+  byte-identical to the canonical Work Item report (Git or Manual).
+- Blocks inside a Task separated by one blank line; repository sections
+  separated by a line containing only `---` with blank lines around it.
+  `---` NEVER appears anywhere else — in particular NOT before/after the
+  Daily Report section.
 - Projects and tasks ordered deterministically (alphabetical by project name,
   then task title; subtasks alphabetical by title) so repeated `/report` runs
   produce identical bytes for identical inputs.
 - File ends with a single trailing newline. Empty day => empty file (0 bytes),
   which is valid and documented.
+
+## Daily Report section (v3.2.0)
+
+Exactly ONE daily output file exists: `{root}/YYYY/MM/DD/report.txt`. The
+Daily Report lives INSIDE that same file — there is no second report file and
+no second flow.
+
+- Heading line: exactly `گزارش روزانه`, appearing at most once per file, as
+  the trailing section after all repository sections.
+- One short line per FINAL Task, in the same deterministic order as the
+  rendered headings: `{Task Title} - {hours}h`.
+- Hours are the exact final stored Task hours (from the deterministic
+  allocation step); the Daily Report never re-runs analysis, never rewrites
+  Work Item reports, and never invents business impact, urgency, metrics,
+  ROI, stakeholder requests or unsupported outcomes.
+- No `---` separator belongs to this section.

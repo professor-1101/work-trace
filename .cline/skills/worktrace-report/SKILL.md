@@ -13,7 +13,7 @@ description: >
   alone). Instructions are English; report language follows configuration/user.
 metadata:
   author: work-trace
-  version: "3.1.0"
+  version: "3.2.0"
 compatibility: Requires Cline (Skills + terminal), Node.js >= 18, git on PATH, and a worktrace.yaml configuration. Cross-platform (Linux/Windows).
 ---
 
@@ -26,15 +26,19 @@ Pipeline (fixed order — never skip or reorder a validation step):
  -> load/validate config            (tools/bin/collect.js does this)
  -> resolve today + timezone        (deterministic, from config)
  -> discover repositories           (deterministic)
- -> collect today's evidence        (deterministic JSON)
+ -> collect today's evidence        (deterministic JSON, Git-only)
  -> INVOKE worktrace-daily-report SKILL on the evidence   <-- semantic engine
- -> obtain Canonical Work Items     ({title, report} per project, JSON)
+ -> obtain Canonical Git Work Items ({title, report} per project, JSON)
  -> validate Work Items             (tools/bin/render.js validate-workitems)
- -> group Work Items into Tasks     (LLM judgment, rules in docs/grouping.md)
+ -> ASK USER «کار دیگه‌ای امروز نکردی؟»   (manual work intake — BEFORE grouping)
+ -> merge Manual Work Items         (tools/bin/render.js merge-manual)
+ -> group unified Work Items into Tasks (LLM judgment, rules in docs/grouping.md)
  -> validate grouping + 3x3         (tools/bin/render.js validate-tasks)
+ -> ASK Task hours AFTER final Tasks (three modes; deterministic allocation)
+ -> allocate hours                 (tools/bin/render.js allocate-hours)
  -> render plain text               (tools/bin/render.js render)
  -> validate output                 (tools/bin/render.js check)
- -> persist report                  (tools/bin/render.js persist)
+ -> persist report                  (tools/bin/render.js persist — final gate)
 ```
 
 ## Hard invariants
@@ -110,10 +114,54 @@ node tools/bin/render.js validate-workitems --evidence .worktrace/evidence.json 
 
 Fix and re-run until OK.
 
+### 2b. Manual work intake (BEFORE grouping) — exact question
+
+After the Canonical Git Work Items are validated, ask the user EXACTLY this
+single question (verbatim, in Persian):
+
+`کار دیگه‌ای امروز نکردی؟`
+
+- The Git collector stays Git-only; nothing about manual work touches it.
+- If the user says no (نه / no / nothing): skip merging entirely — there are
+  NO Manual Work Items and the git document proceeds to grouping unchanged.
+- If the user says yes: convert each MEANINGFUL activity the user actually
+  mentions into one Manual Work Item. Meetings, discussions, code reviews,
+  investigations, documentation, planning, coordination and similar activities
+  qualify. Do NOT invent details: title and report come ONLY from what the
+  user said. Do NOT require structured or JSON input from the user — you
+  transcribe their own words into the internal shape:
+
+  ```json
+  [
+    { "title": "<short label of the activity as described>",
+      "report": "<what the user actually said about it>",
+      "project": "<OPTIONAL: only if the user explicitly tied it to a repository>" }
+  ]
+  ```
+
+  Save as `.worktrace/manual.json` (a bare array, or `{ "items": [...] }`).
+
+- Merge (unified set = Git Work Items + Manual Work Items). This MUST happen
+  before grouping:
+
+```bash
+node tools/bin/render.js merge-manual --evidence .worktrace/evidence.json --work-items .worktrace/work-items.json --manual .worktrace/manual.json --out .worktrace/work-items.json
+```
+
+Grouping rules for manual work:
+- A Manual Work Item may group with a Git Work Item ONLY when the user's own
+  description/evidence supports the relationship. Shared repository name,
+  domain, technology, date, team or topic is NEVER sufficient grounds to
+  group. When in doubt, keep them separate.
+- Genuinely unscoped manual work keeps an honest label (the user's own words,
+  or `""` for a bare section). Never invent a fake repository for it.
+- Existing Git Work Item reports are never changed by merging.
+
 ### 3. Group into Tasks (LLM judgment, post-Work-Item only)
 
-Read [docs/grouping.md](docs/grouping.md). Group each project's Work Items into
-at most 3 Tasks (each Task at most 3 Subtasks). Write `.worktrace/tasks.json`:
+Read [docs/grouping.md](docs/grouping.md). Group each project's Work Items
+(Git AND Manual, from the unified document) into at most 3 Tasks (each Task
+at most 3 Subtasks). Write `.worktrace/tasks.json`:
 
 ```json
 {
@@ -144,6 +192,41 @@ cap — stop, report the failure to the user naming the project and the offendin
 Work Items, and leave the previous day's file untouched (documented behavior,
 see docs/grouping.md §Overflow).
 
+### 4b. Task hours (AFTER final Tasks are determined)
+
+Only after grouping is VALIDATED and the final Task set is fixed, ask the
+user for per-Task hours. Present the final Task list and ask once. Three
+supported answer modes:
+
+- A. ALL SPECIFIED — the user gives a value for every Task
+  (`A=2h B=3h C=1.5h`). Preserve the exact user values; do NOT fill unused
+  time (a total below the daily budget is valid).
+- B. PARTIAL + BALANCE — the user gives values for some Tasks; the rest get
+  an equal share of `remaining = dailyTotal - explicitTotal` (dailyTotal is
+  the HARD product invariant 7.5h — NOT configurable by worktrace.yaml).
+- C. NONE SPECIFIED — split the full daily total equally across all final
+  Tasks.
+
+Hard rules (enforced deterministically by `allocate-hours`, never by you):
+explicit values are preserved exactly; no silent clipping or reduction;
+explicit total > daily limit => REJECT and tell the user; hours must be
+finite numbers >= 0; rounding is deterministic. If there are no final Tasks,
+hour collection is skipped entirely.
+
+Transcribe the user's answers into a JSON array aligned with the FINAL task
+order printed below, using `null` for unspecified Tasks:
+
+```bash
+# Print the deterministic final-task order (projects alphabetical, tasks
+# alphabetical within project) so the allocation array aligns correctly:
+node tools/bin/render.js task-order --tasks .worktrace/tasks.json
+# Allocate (writes hours into tasks.json; rejects invalid input loudly):
+node tools/bin/render.js allocate-hours --tasks .worktrace/tasks.json --alloc '[2,3,null]' --config worktrace.yaml --out .worktrace/tasks.json
+```
+
+Never hand-edit hour values in `tasks.json`; never redistribute hours
+yourself. The script is the single source of hour arithmetic.
+
 ### 5. Render + check plain text (deterministic)
 
 ```bash
@@ -155,6 +238,22 @@ node tools/bin/render.js check --file .worktrace/report.txt --tasks .worktrace/t
 headings not shaped `{Project} - {Task Title}`. Fix `tasks.json` (never the
 rendered file) until OK.
 
+When the tasks document carries hour allocations, the SAME rendered file also
+contains exactly ONE trailing Daily Report section:
+
+```text
+گزارش روزانه
+{Task title} - {exact final hours}h
+```
+
+- Exactly one short line per FINAL Task (grounded task label + exact stored
+  hours), generated from Final Tasks only — it never re-runs Git analysis and
+  never rewrites Work Item reports.
+- No `---` separator is added for this section; `---` remains exclusively the
+  between-repository separator.
+- There is exactly ONE daily output file (`{root}/YYYY/MM/DD/report.txt`).
+  Never create a second report file or a second daily-report flow.
+
 ### 6. Persist (deterministic, atomic, final validation gate)
 
 ```bash
@@ -162,9 +261,12 @@ node tools/bin/render.js persist --tasks .worktrace/tasks.json --work-items .wor
 ```
 
 `persist` is the final gate: it re-validates the grouping contract, verbatim
-Work Item preservation, the configured 3×3 limits, renders, validates the
-rendered document invariants, and only then writes. Invalid grouped output can
-never reach storage.
+Work Item preservation (Git AND Manual), the configured 3×3 limits, stored
+Task hours (finite, >= 0, total <= daily limit), renders, validates the
+rendered document invariants INCLUDING exactly one Daily Report section with
+one entry per Final Task whose hours match the stored Task hours, and only
+then writes atomically. Invalid grouped output can never reach storage — the
+existing day's file stays untouched.
 
 Writes to the configured layout `{root}/YYYY/MM/DD/report.txt` under
 `reportRoot`, auto-creating directories; re-running atomically replaces the

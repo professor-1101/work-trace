@@ -1,4 +1,4 @@
-# WORKTRACE v3.1.0
+# WORKTRACE v3.2.0
 
 Engineering evidence → daily engineering report, driven by Cline Skills and a
 deterministic Node.js workflow layer. Cross-platform (Linux + Windows).
@@ -38,9 +38,12 @@ Primary flow (`/report`):
  -> collect Git evidence          (deterministic JSON)
  -> invoke frozen semantic Skill  (LLM: Canonical Work Items {title, report})
  -> validate Work Items           (deterministic)
+ -> ask «کار دیگه‌ای امروز نکردی؟» (manual work intake, BEFORE grouping)
+ -> merge Manual Work Items       (deterministic merge; unified set)
  -> group Work Items into Tasks   (LLM judgment ONLY)
  -> validate grouping + 3x3       (deterministic, config-driven limits)
- -> render final plain text       (deterministic)
+ -> ask Task hours AFTER final Tasks -> deterministic allocation (<= 7.5h)
+ -> render final plain text       (deterministic; adds one Daily Report section)
  -> validate rendered document    (deterministic)
  -> persist atomically            (deterministic; final validation gate)
 ```
@@ -57,15 +60,35 @@ is grouping already-produced Canonical Work Items into meaningful Tasks.
 ## Installation / update
 
 ```bash
-node scripts/install.js [--target <dir> | --global] [--check]
+node scripts/install.js [--target <dir> | --global]   # install
+node scripts/install.js --check                        # report installed version
+node scripts/install.js --update                       # upgrade installed Skills+tools
 ```
 
-- Idempotent; installs BOTH Skills, the `tools/` layer, and a
-  `worktrace.yaml` template.
+- Idempotent; installs BOTH Skills (`worktrace-daily-report`,
+  `worktrace-report`), the `tools/` layer, and a `worktrace.yaml` template.
 - Never overwrites an existing user `worktrace.yaml` (reports "kept existing").
-- Writes a version marker at `<target>/.cline/worktrace/version`.
-- `--check` prints the installed version without changing anything.
-- No curl-pipe-to-shell; plain `node` + file copy.
+- Writes a version marker at `<target>/.cline/worktrace/version` and a
+  managed-file manifest at `<target>/.cline/worktrace/manifest.json`
+  (SHA-256 of every installer-managed file — powers `--update`).
+
+### Skill updates (`--update`)
+
+`--update` compares the COMPLETE Skill directories (not only `SKILL.md`)
+for both Skills, plus `tools/`:
+
+| Situation                              | Behavior                                             |
+|----------------------------------------|------------------------------------------------------|
+| unchanged source file                  | untouched (no writes)                                 |
+| changed source file                    | installed copy updated                                |
+| locally modified installed file        | CONFLICT — never silently overwritten; exit code 3    |
+| source file removed                    | deleted only if installer-managed AND unmodified      |
+| removed-from-source but locally edited | kept untouched and reported                            |
+| files never managed by the installer   | always left alone                                     |
+| user `worktrace.yaml`                  | never touched by any mode                             |
+| repeated `--update`                    | idempotent ("unchanged")                              |
+
+Exit codes: 0 success · 3 conflicts detected (nothing overwritten).
 
 ## Configuration
 
@@ -78,7 +101,7 @@ Key fields: `projectsRoot`, `reportRoot`, `timezone` (IANA),
 followSymlinks, skipDirs, include/exclude/ignore, nameOverrides),
 `limits.*` (collection caps AND grouping caps), `output.layout`.
 
-Grouping limits (v3.1.0, configuration-driven; defaults 3×3):
+Grouping limits (configuration-driven; defaults 3×3):
 
 ```yaml
 limits:
@@ -91,6 +114,11 @@ The validator and the persist gate consume the configured values. If truly
 independent outcomes exceed the cap and cannot be coherently grouped, the run
 FAILS LOUDLY naming the affected project — Work Items are never silently
 dropped and outcomes are never fabricated to fit the cap.
+
+Daily hours (v3.2.0): the total-hours ceiling of **7.5h** is a HARD product
+invariant owned by `tools/lib/hours.js` (`DAILY_TOTAL_HOURS`). It is NOT a
+configuration key — setting `limits.dailyTotalHours` in `worktrace.yaml` is
+rejected at config load, and no CLI flag can raise it above 7.5h.
 
 ## Repository discovery & date behavior
 
@@ -118,6 +146,43 @@ Preservation rule: after grouping, the Work Item title becomes the Subtask
 title and the report is reused VERBATIM (byte-for-byte). The validator detects
 rewritten reports, dropped items, duplicated items, and altered titles.
 
+### Manual Work Items (v3.2.0)
+
+After the Canonical Git Work Items are validated — and BEFORE grouping — the
+orchestration Skill asks the user exactly:
+
+`کار دیگه‌ای امروز نکردی؟`
+
+- The Git collector stays Git-only; manual work never touches it.
+- "No" → no Manual Work Items; the git document proceeds unchanged.
+- "Yes" → every meaningful activity the user actually mentions (meeting,
+  discussion, review, investigation, documentation, planning, coordination,
+  …) becomes one Manual Work Item `{ title, report, source: "manual" }`.
+  No structured/JSON input is required from the user; nothing is invented.
+- Merge is deterministic (`render.js merge-manual`): Git + Manual items form
+  the unified set feeding the EXISTING grouping flow. A Manual Work Item may
+  group with a Git Work Item ONLY when the user's own description supports
+  the relationship — shared repo/domain/technology/date/team/topic is never
+  sufficient grounds. Genuinely unscoped manual work keeps an honest label
+  (or an empty scope rendered as a bare Task heading); no fake repository is
+  ever invented. Existing Git Work Item reports are never changed.
+
+### Hours (v3.2.0)
+
+Task hours are collected ONLY after final Tasks are determined, in three
+modes (deterministic arithmetic in `tools/lib/hours.js`, never LLM judgment):
+
+- **A. All specified** (`A=2h B=3h C=1.5h`) — exact user values preserved;
+  unused time is NOT filled.
+- **B. Partial + balance** — `remaining = 7.5 − explicitTotal` split equally
+  and deterministically among unspecified Tasks.
+- **C. None specified** — the full 7.5h split equally across all final Tasks.
+
+Hard rules: total ≤ 7.5h (absolute product invariant — not configurable),
+hours ≥ 0 finite numbers only, explicit values preserved, no silent clipping
+or reduction, explicit total > 7.5 → rejected, deterministic rounding, no
+final Tasks → hour collection skipped. Hours never influence grouping.
+
 ## Output format
 
 Final artifact is plain `.txt` — no Markdown, bullets, numbering, tables,
@@ -132,6 +197,24 @@ emojis, or structural labels ("Task 1", "Subtask", "Repository", "Project",
 - Empty day → empty file. Ordering deterministic (project, then task, then
   subtask title).
 
+### Daily Report (v3.2.0)
+
+There is exactly ONE daily output file (`{root}/YYYY/MM/DD/report.txt`). When
+the tasks document carries hour allocations, the SAME file gains exactly one
+trailing section:
+
+```text
+گزارش روزانه
+{Task title} - {exact final hours}h
+```
+
+- Exactly one short entry per FINAL Task (grounded task label + exact stored
+  hours), generated from Final Tasks only — it never re-runs Git analysis and
+  never rewrites Work Item reports.
+- No `---` separator is added for this section; `---` remains exclusively the
+  between-repository separator.
+- No second report file, no `daily-report.txt`, no second daily-report flow.
+
 ## Storage
 
 `{reportRoot}/YYYY/MM/DD/report.txt` (config-driven `output.layout`). Missing
@@ -139,8 +222,11 @@ directories are created; writes are atomic (temp file + rename); reruns
 overwrite cleanly (last run wins, no duplicate daily files).
 
 **Persist gate:** `persist` re-validates grouping contract, verbatim Work
-Item preservation, configured 3×3 limits, and rendered invariants before any
-write. Invalid grouped output can never reach storage.
+Item preservation (Git AND Manual), configured 3×3 limits, stored Task hours
+(finite, ≥ 0, total ≤ hard 7.5h ceiling), and rendered invariants — including
+exactly one Daily Report section with one entry per Final Task whose hours
+match the stored Task hours — before any write. Invalid grouped output can
+never reach storage; the existing day's file stays untouched.
 
 ## Versioning
 
@@ -148,7 +234,7 @@ Single authoritative source: `tools/lib/version.js`. Derived locations kept
 in sync (enforced by tests): `VERSION`, `tools/package.json`,
 the `worktrace-report` Skill metadata, the
 installer marker, and the current `CHANGELOG.md` entry. Historical changelog
-entries remain historical. Current release: **3.1.0**.
+entries remain historical. Current release: **3.2.0**.
 
 ## Legacy removal
 
@@ -162,13 +248,18 @@ CHANGELOG entries reference them.
 ```bash
 node tools/bin/collect.js --config worktrace.yaml > evidence.json
 node tools/bin/render.js validate-workitems --evidence evidence.json --work-items work-items.json
+node tools/bin/render.js merge-manual --evidence evidence.json --work-items work-items.json --manual manual.json --out work-items.json
+node tools/bin/render.js task-order --tasks tasks.json
 node tools/bin/render.js validate-tasks --work-items work-items.json --tasks tasks.json [--config worktrace.yaml]
+node tools/bin/render.js allocate-hours --tasks tasks.json --alloc '[2,3,null]' --out tasks.json
 node tools/bin/render.js render --tasks tasks.json --out report.txt
 node tools/bin/render.js check --file report.txt --tasks tasks.json
 node tools/bin/render.js persist --tasks tasks.json --config worktrace.yaml [--date YYYY-MM-DD] [--work-items work-items.json]
 ```
 
 Exit codes: 0 ok · 1 validation failure · 2 usage/config error.
+The daily hour ceiling is a hard product invariant (total hours <= 7.5h):
+it is not configurable and no CLI flag may raise or lower it.
 
 ## Development / testing
 
