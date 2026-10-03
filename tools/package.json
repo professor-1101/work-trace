@@ -1,6 +1,6 @@
 {
   "name": "@worktrace/tools",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Deterministic git evidence collector, validator and renderer for the WORKTRACE /report workflow. No semantic grouping or Persian generation happens here; that is the job of the existing worktrace-daily-report Skill.",
   "type": "commonjs",
   "license": "MIT",

@@ -2,7 +2,8 @@
 
 Grouping happens ONLY after Canonical Work Items exist and passed
 `validate-workitems`. Input: `[{title, report}, ...]` per project. Output: at
-most 3 Tasks per project, each with at most 3 Subtasks. The grouping decision is
+most 3 Tasks per project, each with at most 3 Subtasks (defaults; the caps are
+configuration-driven — see §3×3 rule). The grouping decision is
 LLM judgment; the limits and verbatim preservation are machine-enforced by
 `tools/bin/render.js validate-tasks`.
 
@@ -47,8 +48,12 @@ heavy lifting, prefer separate Tasks.
 
 ## 3×3 rule
 
-- Maximum 3 Tasks per repository/project.
-- Maximum 3 Subtasks per Task.
+- Maximum 3 Tasks per repository/project (`limits.maxTasksPerRepository`).
+- Maximum 3 Subtasks per Task (`limits.maxSubtasksPerTask`).
+- Both caps are configuration-driven; defaults are 3 and 3. Valid overrides
+  must be positive integers (rejected at config load otherwise), and the
+  validator + persist gate consume the configured values — never a
+  hard-coded constant.
 - Never destroy independent outcomes to satisfy the limit (no dropping, no
   fabricating "shared objectives", no merging reports into one paragraph).
 

@@ -40,7 +40,7 @@ test('12. four subtasks in one task violates the 3-subtask cap', () => {
   const expected = tasksDoc([{ project: 'p', workItems: items }]);
   const doc = tasksDoc([{ project: 'p', tasks: [{ title: 'X', subtasks: items }] }]);
   const res = validateTasksDoc(doc, expected);
-  assert.ok(!res.ok && res.errors.some((e) => /3-subtask limit/.test(e)));
+  assert.ok(!res.ok && res.errors.some((e) => /maxSubtasksPerTask=3/.test(e)), 'default cap 3 enforced');
 });
 
 test('12b. four tasks in one repo violates the 3-task cap', () => {
@@ -53,7 +53,7 @@ test('12b. four tasks in one repo violates the 3-task cap', () => {
     },
   ]);
   const res = validateTasksDoc(doc, expected);
-  assert.ok(!res.ok && res.errors.some((e) => /3-task limit/.test(e)));
+  assert.ok(!res.ok && res.errors.some((e) => /maxTasksPerRepository=3/.test(e)), 'default cap 3 enforced');
 });
 
 test('13. independent outcomes are preserved: rewriting/shortening/dropping detected', () => {
@@ -91,7 +91,60 @@ test('14. >9 genuinely independent outcomes cannot fit 3x3 — failure is detect
   // And a fabricated 4th task also fails the cap — no silent escape hatch.
   const four = tasksDoc([{ project: 'p', tasks: [0, 1, 2, 3].map((t) => ({ title: `task ${t}`, subtasks: [items[t]] })) }]);
   const res2 = validateTasksDoc(four, expected);
-  assert.ok(!res2.ok && res2.errors.some((e) => /3-task limit/.test(e)));
+  assert.ok(!res2.ok && res2.errors.some((e) => /maxTasksPerRepository=3/.test(e)), '4th task fails the configured cap');
+});
+
+// --- v3.1.0: configuration-driven 3×3 limits -------------------------------
+const { effectiveLimits } = require('../lib/render');
+const { DEFAULTS, validateAndNormalize } = require('../lib/config');
+
+test('v3.1 configurable limits: defaults resolve to 3x3', () => {
+  assert.deepStrictEqual(effectiveLimits(undefined), { maxTasksPerRepo: 3, maxSubtasksPerTask: 3 });
+  assert.deepStrictEqual(effectiveLimits({}), { maxTasksPerRepo: 3, maxSubtasksPerTask: 3 });
+  assert.strictEqual(DEFAULTS.limits.maxTasksPerRepository, 3);
+  assert.strictEqual(DEFAULTS.limits.maxSubtasksPerTask, 3);
+});
+
+test('v3.1 configurable limits: valid overrides consumed by validator', () => {
+  const cfg = validateAndNormalize(
+    { projectsRoot: process.cwd(), reportRoot: process.cwd(), limits: { maxTasksPerRepository: 5, maxSubtasksPerTask: 4 } },
+    '<test>'
+  );
+  assert.deepStrictEqual(effectiveLimits(cfg), { maxTasksPerRepo: 5, maxSubtasksPerTask: 4 });
+  // 4 tasks now legal under the override:
+  const items = [wi('a', '1'), wi('b', '2'), wi('c', '3'), wi('d', '4')];
+  const expected = tasksDoc([{ project: 'p', workItems: items }]);
+  const doc = tasksDoc([{ project: 'p', tasks: items.map((s) => ({ title: s.title + ' task', subtasks: [s] })) }]);
+  const res = validateTasksDoc(doc, expected, effectiveLimits(cfg));
+  assert.ok(res.ok, res.errors.join('; '));
+});
+
+test('v3.1 invalid limits rejected deterministically (non-integer/zero/negative)', () => {
+  for (const bad of [0, -1, 2.5, 'three']) {
+    assert.throws(
+      () => validateAndNormalize({ projectsRoot: process.cwd(), reportRoot: process.cwd(), limits: { maxTasksPerRepository: bad } }, '<test>'),
+      /limits\.maxTasksPerRepository` must be a positive integer/,
+      `reject ${JSON.stringify(bad)}`
+    );
+    assert.throws(
+      () => validateAndNormalize({ projectsRoot: process.cwd(), reportRoot: process.cwd(), limits: { maxSubtasksPerTask: bad } }, '<test>'),
+      /limits\.maxSubtasksPerTask` must be a positive integer/,
+      `reject ${JSON.stringify(bad)}`
+    );
+  }
+});
+
+test('v3.1 overflow beyond raised cap still fails honestly, names project and cap', () => {
+  const cfg = validateAndNormalize(
+    { projectsRoot: process.cwd(), reportRoot: process.cwd(), limits: { maxTasksPerRepository: 2, maxSubtasksPerTask: 1 } },
+    '<test>'
+  );
+  const items = [wi('a', '1'), wi('b', '2'), wi('c', '3')];
+  const expected = tasksDoc([{ project: 'myproj', workItems: items }]);
+  const doc = tasksDoc([{ project: 'myproj', tasks: items.map((s) => ({ title: s.title + ' t', subtasks: [s] })) }]);
+  const res = validateTasksDoc(doc, expected, effectiveLimits(cfg));
+  assert.ok(!res.ok);
+  assert.ok(res.errors.some((e) => e.includes('myproj') && /maxTasksPerRepository=2/.test(e)), 'affected project identified');
 });
 
 test('15. task titles carry `{Project} - {Task Title}`; subtasks never get the prefix', () => {
@@ -127,14 +180,15 @@ test('17. markdown constructs rejected', () => {
   }
 });
 
-test('18. exact `---` separator between task sections, nothing else', () => {
+test('18. exact `---` separator between repository sections, nothing else', () => {
   const doc = tasksDoc([
     { project: 'p1', tasks: [{ title: 'A', subtasks: [wi('i1', 'r1')] }, { title: 'B', subtasks: [wi('i2', 'r2')] }] },
     { project: 'p2', tasks: [{ title: 'C', subtasks: [wi('i3', 'r3')] }] },
+    { project: 'p3', tasks: [{ title: 'D', subtasks: [wi('i4', 'r4')] }] },
   ]);
   const text = renderTasks(doc);
   const sepLines = text.split('\n').filter((l) => l.trim() === '---');
-  assert.strictEqual(sepLines.length, 2, 'three sections -> two separators');
+  assert.strictEqual(sepLines.length, 2, 'three repository sections -> two separators');
   assert.ok(text.split('\n').every((l) => l !== ' ---' && l !== '--- '), 'separators are exactly "---"');
   assert.ok(!text.includes('***') && !text.includes('___'));
   const res = validateRendered(text, doc);

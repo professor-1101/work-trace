@@ -8,6 +8,17 @@
 
 const { MAX_TASKS_PER_REPO, MAX_SUBTASKS_PER_TASK } = require('./workitems');
 
+// Grouping limits are configuration-driven (limits.maxTasksPerRepository /
+// limits.maxSubtasksPerTask). These helpers resolve effective values from a
+// config object while falling back to the documented 3×3 defaults.
+function effectiveLimits(cfg) {
+  const lim = (cfg && cfg.limits) || {};
+  return {
+    maxTasksPerRepo: Number.isInteger(lim.maxTasksPerRepository) && lim.maxTasksPerRepository > 0 ? lim.maxTasksPerRepository : MAX_TASKS_PER_REPO,
+    maxSubtasksPerTask: Number.isInteger(lim.maxSubtasksPerTask) && lim.maxSubtasksPerTask > 0 ? lim.maxSubtasksPerTask : MAX_SUBTASKS_PER_TASK,
+  };
+}
+
 const PROHIBITED_LABELS = [
   'Task 1', 'Task 2', 'Task 3',
   'Main Task', 'Subtask 1', 'Subtask 2', 'Subtask 3',
@@ -84,7 +95,9 @@ function markdownHits(text) {
 // }
 // `expected`: optional map project -> array of {title, report} (the validated
 // work-items doc) used to prove grouping did not rewrite anything.
-function validateTasksDoc(doc, expected) {
+// `limits`: optional resolved limits from effectiveLimits(cfg); defaults 3×3.
+function validateTasksDoc(doc, expected, limits) {
+  const caps = Object.assign({ maxTasksPerRepo: MAX_TASKS_PER_REPO, maxSubtasksPerTask: MAX_SUBTASKS_PER_TASK }, limits || {});
   const errors = [];
   if (!doc || typeof doc !== 'object' || !Array.isArray(doc.projects)) {
     errors.push('tasks document must contain a `projects` array.');
@@ -100,9 +113,9 @@ function validateTasksDoc(doc, expected) {
       errors.push(`project "${proj}": \`tasks\` must be an array.`);
       continue;
     }
-    if (p.tasks.length > MAX_TASKS_PER_REPO) {
+    if (p.tasks.length > caps.maxTasksPerRepo) {
       errors.push(
-        `project "${proj}": ${p.tasks.length} tasks exceeds the 3-task limit (3x3 rule). ` +
+        `project "${proj}": ${p.tasks.length} tasks exceeds the configured limit limits.maxTasksPerRepository=${caps.maxTasksPerRepo}. ` +
           'Do NOT drop or fabricate merges to satisfy it: regroup only when outcomes genuinely share one objective, otherwise the run must fail loudly.'
       );
     }
@@ -114,9 +127,9 @@ function validateTasksDoc(doc, expected) {
         return;
       }
       if (t.subtasks.length === 0) errors.push(`project "${proj}" task[${ti}]: empty task would produce an empty section.`);
-      if (t.subtasks.length > MAX_SUBTASKS_PER_TASK) {
+      if (t.subtasks.length > caps.maxSubtasksPerTask) {
         errors.push(
-          `project "${proj}" task[${ti}]: ${t.subtasks.length} subtasks exceeds the 3-subtask limit (3x3 rule). Independent outcomes must not be destroyed to fit the cap.`
+          `project "${proj}" task[${ti}]: ${t.subtasks.length} subtasks exceeds the configured limit limits.maxSubtasksPerTask=${caps.maxSubtasksPerTask}. Independent outcomes must not be destroyed to fit the cap.`
         );
       }
       t.subtasks.forEach((s, si) => {
@@ -166,6 +179,10 @@ function normalizeText(s) {
 }
 
 // Render the tasks document into the final plain text.
+// v3.1.0 contract: ONE repository section per project. `---` appears ONLY
+// between repository sections — for N projects exactly N-1 separator lines,
+// and NEVER between two Tasks inside the same repository section. Ordering is
+// deterministic (project name, then task title, then subtask title).
 function renderTasks(doc) {
   const sections = [];
   const orderedProjects = [...(doc.projects || [])].sort((a, b) =>
@@ -175,58 +192,106 @@ function renderTasks(doc) {
     const tasks = [...(p.tasks || [])].sort((a, b) =>
       String(a.title).localeCompare(String(b.title))
     );
+    const blocks = [];
     for (const t of tasks) {
       const head = `${p.project} - ${normalizeText(t.title)}`;
-      const blocks = [head];
+      const taskBlocks = [head];
       const subtasks = [...(t.subtasks || [])].sort((a, b) =>
         String(a.title).localeCompare(String(b.title))
       );
       for (const s of subtasks) {
-        blocks.push(`${normalizeText(s.title)}\n${normalizeText(s.report)}`);
+        taskBlocks.push(`${normalizeText(s.title)}\n${normalizeText(s.report)}`);
       }
-      sections.push(blocks.join('\n\n'));
+      blocks.push(taskBlocks.join('\n\n'));
     }
+    if (blocks.length) sections.push(blocks.join('\n\n'));
   }
   if (sections.length === 0) return '';
   return sections.join('\n\n---\n\n') + '\n';
 }
 
 // Validate rendered text (structural pass over the artifact itself).
+// v3.1.0 contract: ONE repository section per project; `---` appears ONLY
+// between repository sections (exactly N-1 for N non-empty projects) and
+// NEVER between two Tasks of the same repository. Headings must be exactly
+// `{Project} - {Task Title}` in the deterministic render order; every task
+// block's first line after a heading must be a Work Item title line (no
+// fabricated or missing blocks).
 function validateRendered(text, doc) {
   const errors = [];
   if (text === '') return { ok: true, errors, empty: true };
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t === '---' && lines[i] !== '---') errors.push(`Separator line ${i + 1} must be exactly "---".`);
+  }
+  // Structural checks run whenever a tasks document is supplied.
+  if (doc) {
+    const orderedProjects = [...(doc.projects || [])].sort((a, b) => String(a.project).localeCompare(String(b.project)));
+    const nonEmptyProjects = orderedProjects.filter((p) => (p.tasks || []).length > 0);
+    // Deterministic expected blocks, mirroring renderTasks exactly.
+    const wantSections = []; // one entry per non-empty project
+    for (const p of orderedProjects) {
+      const tasks = [...(p.tasks || [])].sort((a, b) => String(a.title).localeCompare(String(b.title)));
+      if (!tasks.length) continue;
+      const sec = [];
+      for (const t of tasks) {
+        sec.push(`${p.project} - ${normalizeText(t.title)}`);
+        const subtasks = [...(t.subtasks || [])].sort((a, b) => String(a.title).localeCompare(String(b.title)));
+        for (const s of subtasks) sec.push(`${normalizeText(s.title)}\n${normalizeText(s.report)}`);
+      }
+      wantSections.push(sec);
+    }
+    // Split the artifact into repository sections on standalone `---` lines.
+    const rawSections = [];
+    let cur = [];
+    for (const l of lines) {
+      if (l === '---') { rawSections.push(cur); cur = []; }
+      else cur.push(l);
+    }
+    rawSections.push(cur);
+    // Drop leading/trailing blank lines per section.
+    const trimmedSections = rawSections.map((s) => {
+      const a = [...s];
+      while (a.length && a[0].trim() === '') a.shift();
+      while (a.length && a[a.length - 1].trim() === '') a.pop();
+      return a;
+    });
+    const sepCount = lines.filter((l) => l.trim() === '---').length;
+    if (sepCount !== Math.max(nonEmptyProjects.length - 1, 0)) {
+      errors.push(`Expected exactly ${Math.max(nonEmptyProjects.length - 1, 0)} "---" separator line(s) for ${nonEmptyProjects.length} repository section(s), found ${sepCount}.`);
+    }
+    if (trimmedSections.length !== nonEmptyProjects.length) {
+      errors.push(`Expected ${nonEmptyProjects.length} repository section(s), found ${trimmedSections.length}; "---" may only appear BETWEEN repository sections.`);
+    } else {
+      // Per-section verification: heading set + exact block sequence. This
+      // detects in-section separators (an extra section), dropped/duplicated
+      // tasks, altered headings, and reordered content.
+      trimmedSections.forEach((secLines, si) => {
+        const want = wantSections[si];
+        if (!want) return;
+        const proj = nonEmptyProjects[si].project;
+        // Artifact blocks are separated by blank lines, mirroring the
+        // renderer: heading block, then one block per Work Item.
+        const gotBlocks = secLines.join('\n').split(/\n[ \t]*\n/);
+        const wantBlocks = want.join('\n\n').split(/\n[ \t]*\n/);
+        // Headings present in this section vs expected for this project.
+        const wantHeads = wantBlocks.map((b) => b.split('\n')[0]);
+        const gotHeads = gotBlocks.map((b) => b.split('\n')[0]);
+        if (gotHeads.length !== wantHeads.length || gotHeads.some((h, i) => h !== wantHeads[i])) {
+          errors.push(`Repository section "${proj}": task headings do not match the expected \`{Project} - {Task Title}\` set/order.`);
+        }
+        if (gotBlocks.join('\n\u0000') !== wantBlocks.join('\n\u0000')) {
+          errors.push(`Repository section "${proj}": rendered content does not match the tasks document byte-for-byte (Work Item titles/reports must be verbatim; no separator allowed inside a repository section).`);
+        }
+      });
+    }
+  }
   const md = markdownHits(text);
   for (const h of md) errors.push(`Markdown/format violation at line ${h.line}: ${h.reason}`);
   const labels = prohibitedLabelHits(text);
   for (const h of labels) errors.push(`Prohibited structural label at line ${h.line}: "${h.text}"`);
-  const lines = text.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    const t = lines[i].trim();
-    if (t === '---') {
-      if (lines[i] !== '---') errors.push(`Separator line ${i + 1} must be exactly "---".`);
-      continue;
-    }
-  }
-  // Every task heading must carry the project prefix exactly once.
-  if (doc) {
-    const heads = [];
-    let expectHeading = true;
-    for (const raw of lines) {
-      const t = raw.trim();
-      if (t === '' || t === '---') { if (t === '---') expectHeading = true; continue; }
-      if (expectHeading) { heads.push(t); expectHeading = false; }
-    }
-    const wantHeads = [];
-    const orderedProjects = [...(doc.projects || [])].sort((a, b) => String(a.project).localeCompare(String(b.project)));
-    for (const p of orderedProjects) {
-      const tasks = [...(p.tasks || [])].sort((a, b) => String(a.title).localeCompare(String(b.title)));
-      for (const t of tasks) wantHeads.push(`${p.project} - ${normalizeText(t.title)}`);
-    }
-    if (heads.length !== wantHeads.length || heads.some((h, i) => h !== wantHeads[i])) {
-      errors.push('Task headings do not match `{Project} - {Task Title}` structure.');
-    }
-  }
   return { ok: errors.length === 0, errors };
 }
 
-module.exports = { renderTasks, validateTasksDoc, validateRendered, prohibitedLabelHits, markdownHits, normalizeText, PROHIBITED_LABELS };
+module.exports = { renderTasks, validateTasksDoc, validateRendered, prohibitedLabelHits, markdownHits, normalizeText, effectiveLimits, PROHIBITED_LABELS };
