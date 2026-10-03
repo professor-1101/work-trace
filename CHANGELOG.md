@@ -7,6 +7,62 @@ The single authoritative version source is `tools/lib/version.js`;
 installed marker (`.cline/worktrace/version`) must always match it
 (enforced by `tools/tests/config-install.test.js`).
 
+## 3.2.0
+
+Additive release on top of 3.1.0. The frozen semantic Skill
+(`worktrace-daily-report`) remains byte-for-byte unchanged, and the single
+daily output file contract is preserved (one `{root}/YYYY/MM/DD/report.txt`,
+no second report flow).
+
+### Added
+
+- **Skill update mode in the existing installer** (`node scripts/install.js
+  --update`): no separate updater. Both Skills (`worktrace-daily-report`,
+  `worktrace-report`) and `tools/` are compared as COMPLETE directories
+  (SHA-256 manifest at `<target>/.cline/worktrace/manifest.json`). Unchanged
+  source → no-op; changed source → installed copy updated; locally modified
+  installed files → CONFLICT reported and never silently overwritten (exit
+  3); removed source files → deleted only when installer-managed AND
+  unmodified; user `worktrace.yaml` → never touched; repeated `--update` is
+  idempotent. Plain install/check behavior is preserved.
+- **Manual Work Items**: after Canonical Git Work Items validation and
+  BEFORE grouping, the orchestration Skill asks exactly
+  «کار دیگه‌ای امروز نکردی؟». Activities the user actually mentions become
+  Manual Work Items `{title, report, source: "manual"}` — no invented
+  details, no structured input required. Deterministic merge via
+  `render.js merge-manual` produces the unified set feeding the EXISTING
+  grouping flow. Git collector stays Git-only. Grouping with a Git Work
+  Item requires user-stated evidence; genuinely unscoped work keeps an
+  honest label (never a fake repository).
+- **Deterministic Task hours** (`tools/lib/hours.js`, `render.js
+  allocate-hours`), collected ONLY after final Tasks are fixed. Three
+  modes: all specified (values preserved exactly, unused time not filled);
+  partial + balance (`remaining = 7.5 − explicitTotal` split equally);
+  none specified (full 7.5h split equally). Hard rules: finite numbers ≥ 0,
+  total ≤ 7.5h, explicit total > 7.5 rejected (no silent clipping or
+  reduction), deterministic hundredth rounding, hour collection skipped
+  when there are no final Tasks. Hours never influence grouping.
+- **Daily Report section** inside the SAME daily file: exactly one trailing
+  `گزارش روزانه` section with one short entry per Final Task
+  (`{Task title} - {H}h`, grounded label + exact stored hours), generated
+  from Final Tasks only. No extra `---` separator (repository separator
+  semantics unchanged). Validated by `check` and the persist gate.
+- Persist gate extensions: stored Task hours validation (finite, ≥ 0,
+  total ≤ hard 7.5 ceiling) and Daily Report completeness (one section,
+  one entry per Final Task, hours match stored values) before any atomic
+  write; invalid output never replaces the existing file.
+- Test coverage for installer update/conflict/idempotence/config
+  preservation (both Skills), manual-work merging, all three hour modes,
+  > 7.5 rejection, invalid inputs, deterministic rounding, Daily Report
+  invariants, and the extended persist gate.
+
+### Hard invariant
+
+- The 7.5h daily total is an absolute product constant owned by
+  `tools/lib/hours.js` (`DAILY_TOTAL_HOURS`). It is NOT configurable:
+  `limits.dailyTotalHours` is rejected at config load, and `--daily-total`
+  may only lower the budget (e.g. half-day), never raise it above 7.5.
+
 ## 3.1.0
 
 Additive workflow hardening on top of 3.0.0. The frozen semantic Skill

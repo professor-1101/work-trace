@@ -1,11 +1,31 @@
 # Task Grouping Rules (post-Work-Item layer)
 
 Grouping happens ONLY after Canonical Work Items exist and passed
-`validate-workitems`. Input: `[{title, report}, ...]` per project. Output: at
+`validate-workitems` — and, since v3.2.0, AFTER the manual-work question
+(«کار دیگه‌ای امروز نکردی؟») has been asked and the unified set
+(Git Work Items + Manual Work Items) has been produced by `merge-manual`.
+Input: `[{title, report}, ...]` per project. Output: at
 most 3 Tasks per project, each with at most 3 Subtasks (defaults; the caps are
 configuration-driven — see §3×3 rule). The grouping decision is
 LLM judgment; the limits and verbatim preservation are machine-enforced by
 `tools/bin/render.js validate-tasks`.
+
+## Manual Work Items (v3.2.0)
+
+Manual items enter the SAME unified document as Git items and follow every
+existing rule above. Additional constraints specific to manual work:
+
+- A Manual Work Item may group with a Git Work Item ONLY when the user's own
+  description or evidence supports the relationship. It NEVER groups merely
+  because of a shared repository, domain, technology, date, team or topic —
+  that is already prohibited for Git items and applies with extra force here,
+  because manual context is what the user SAID, not what the repo shows.
+- Genuinely unscoped manual work keeps its own honest section/Task label (the
+  user's words). Do NOT invent a fake repository name for it.
+- Meeting / discussion / review / investigation / documentation / planning /
+  coordination activities become Manual Work Items using ONLY details the user
+  actually provided. No invented participants, durations, decisions or outcomes.
+- Existing Git Work Item reports are untouched by merging or grouping.
 
 ## What a Task is
 
