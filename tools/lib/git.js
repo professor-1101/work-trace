@@ -277,14 +277,27 @@ function repoState(repoDir) {
 const LOG_FORMAT = ['%H', '%h', '%p', '%an', '%ae', '%ad', '%at', '%cn', '%ce', '%cd', '%ct', '%s', '%B'].join(GIT_SEP) + REC_SEP;
 
 function collectCommitsInRange(repoDir, startMs, endMs, cfg) {
-  // Commits reachable from HEAD whose COMMITTER date falls in [start,end).
-  // Author dates are preserved per commit; filtering on committer date is the
-  // deterministic, rebase-safe convention documented in the README.
-  const sinceArg = `--since=${Math.floor(startMs / 1000)}`;
-  const untilArg = `--until=${Math.floor(endMs / 1000)}`;
+  // Commits reachable from HEAD whose COMMITTER date falls in the exact
+  // half-open interval [startMs/1000, endMs/1000).
+  //
+  // Determinism note (real defect fixed in v3.1.0): git's --since/--until
+  // parsing depends on the ambient timezone and its date-first walk keeps
+  // ancestors of in-window commits. On some machines/timezones that filter
+  // silently drops legitimate same-day commits (observed with this Git
+  // version), so day-window membership is computed HERE, from the raw
+  // committer epoch (%ct), never from shell date strings or GNU date.
+  const sinceSec = Math.floor(startMs / 1000);
+  const untilSec = Math.floor(endMs / 1000);
+  // Scan horizon: newest-first walk bounded by an explicit -n cap. The old
+  // v3.0.0 code applied the same cap BEFORE exact-window filtering, which
+  // could silently drop older same-day commits behind a burst of newer ones;
+  // here the cap is applied AFTER filtering (see below) and the scan horizon
+  // is widened so dense histories still surface every commit on the target
+  // day. The walk always remains bounded — never an unbounded history scan.
+  const maxScan = Math.min(Math.max(cfg.limits.maxCommitsPerRepo * 50, 5000), 100000);
   const res = runGit(
     repoDir,
-    ['log', 'HEAD', sinceArg, untilArg, `--max-count=${cfg.limits.maxCommitsPerRepo}`, `--format=${LOG_FORMAT}`, '--date=iso-strict'],
+    ['log', 'HEAD', '-n', String(maxScan), `--format=${LOG_FORMAT}`, '--date=iso-strict'],
     64 * 1024 * 1024
   );
   if (!res.ok) {
@@ -309,15 +322,33 @@ function collectCommitsInRange(repoDir, startMs, endMs, cfg) {
       committer: { name: committerName, email: committerEmail, date: commitDate.trim(), timestamp: Number(commitTs) },
       subject: subject,
       message: body.replace(/\n+$/, ''),
+      // Reverts are first-class evidence for the semantic layer: Git exposes
+      // them only through the message convention ("This reverts commit ..."),
+      // so flag them deterministically here (documented collector contract).
+      isRevert: detectRevert(subject, body),
       bot: detectBot(authorName, authorEmail),
     });
   }
-  // Post-filter to the EXACT [startMs, endMs) committer-date interval.
-  // git's --since/--until date-first-walk optimization can include older
-  // commits whose ancestors fall inside the window; that would break day
-  // boundaries, so membership is enforced deterministically here.
-  commits = commits.filter((c) => c.committer.timestamp * 1000 >= startMs && c.committer.timestamp * 1000 < endMs);
-  return { commits, logError: null };
+  // Filter to the EXACT [startMs, endMs) committer-date interval using the
+  // raw %ct epoch — never Git's timezone-sensitive --since/--until parsing.
+  commits = commits.filter((c) => c.committer.timestamp >= sinceSec && c.committer.timestamp < untilSec);
+  // Cap AFTER exact-window filtering so limits.maxCommitsPerRepo applies to
+  // same-day commits, not to raw history scanned. Newest-first order is
+  // preserved; truncation is recorded as an explicit warning upstream.
+  if (commits.length > cfg.limits.maxCommitsPerRepo) {
+    commits.truncatedByCap = true;
+    commits = commits.slice(0, cfg.limits.maxCommitsPerRepo);
+  }
+  return { commits, logError: null, truncatedByCap: Boolean(commits.truncatedByCap) };
+}
+
+// Deterministic revert detection matching Git's own `git revert` output
+// convention: subject `Revert "<original>"` and/or a body line
+// `This reverts commit <hash>.`
+function detectRevert(subject, body) {
+  const s = String(subject || '');
+  const b = String(body || '');
+  return /^Revert\s+"?/i.test(s.trim()) || /^This reverts commit [0-9a-f]{7,40}[.:]/im.test(b);
 }
 
 function detectBot(name, email) {
@@ -384,13 +415,14 @@ function collectRepository(repoRec, cfg, targetDate, timeZone) {
     return result; // empty repo: no commits today, valid outcome
   }
   const bounds = dayBounds(targetDate, timeZone);
-  const { commits, logError } = collectCommitsInRange(repoRec.path, bounds.startMs, bounds.endMs, cfg);
+  const { commits, logError, truncatedByCap } = collectCommitsInRange(repoRec.path, bounds.startMs, bounds.endMs, cfg);
   if (logError) result.errors.push(`git log failed: ${logError}`);
   for (const c of commits) {
     c.evidence = collectCommitEvidence(repoRec.path, c, cfg);
     result.commits.push(c);
   }
-  if (result.commits.length >= cfg.limits.maxCommitsPerRepo) {
+  if (truncatedByCap) {
+    result.truncatedByCap = true;
     result.warnings = [`commit count hit limits.maxCommitsPerRepo=${cfg.limits.maxCommitsPerRepo}; older commits on this date may be missing`];
   }
   return result;

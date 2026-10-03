@@ -30,6 +30,10 @@ const DEFAULTS = {
     maxCommitsPerRepo: 500,
     maxEvidenceBytesPerCommit: 200 * 1024,
     maxStatFiles: 200,
+    // Grouping contract (3×3 rule). Configuration-driven; the validator and
+    // persist gate use these values, never hard-coded constants.
+    maxTasksPerRepository: 3,
+    maxSubtasksPerTask: 3,
   },
   output: {
     layout: '{root}/YYYY/MM/DD/report.txt',
@@ -126,7 +130,14 @@ function validateAndNormalize(raw, configPath) {
 
   const lim = get(raw, 'limits');
   if (lim && typeof lim === 'object') {
-    for (const k of ['maxRepos', 'maxCommitsPerRepo', 'maxEvidenceBytesPerCommit', 'maxStatFiles']) {
+    for (const k of [
+      'maxRepos',
+      'maxCommitsPerRepo',
+      'maxEvidenceBytesPerCommit',
+      'maxStatFiles',
+      'maxTasksPerRepository',
+      'maxSubtasksPerTask',
+    ]) {
       if (lim[k] !== undefined) {
         const n = Number(lim[k]);
         if (!Number.isInteger(n) || n <= 0) errors.push(`\`limits.${k}\` must be a positive integer.`);

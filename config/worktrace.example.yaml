@@ -49,6 +49,12 @@ limits:
   maxCommitsPerRepo: 500          # per-day cap; hitting it emits a warning
   maxEvidenceBytesPerCommit: 204800  # full patch kept only within this budget
   maxStatFiles: 200               # file-list lines kept per commit stat
+  # Grouping contract (the "3x3 rule"). Positive integers; defaults 3 and 3.
+  # The validator and the persist gate enforce these exact values. Overflow of
+  # genuinely independent outcomes fails the run loudly — Work Items are never
+  # silently dropped or fabricated to fit the caps.
+  maxTasksPerRepository: 3        # max Tasks per repository section
+  maxSubtasksPerTask: 3           # max Subtasks (Work Items) per Task
 
 output:
   # Tokens: {root}, YYYY, MM, DD. Default daily layout:

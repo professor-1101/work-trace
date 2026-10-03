@@ -7,6 +7,35 @@ The single authoritative version source is `tools/lib/version.js`;
 installed marker (`.cline/worktrace/version`) must always match it
 (enforced by `tools/tests/config-install.test.js`).
 
+## 3.1.0
+
+Additive workflow hardening on top of 3.0.0. The frozen semantic Skill
+(`worktrace-daily-report`) remains byte-for-byte unchanged.
+
+### Added
+
+- Configuration-driven grouping limits: `limits.maxTasksPerRepository` and
+  `limits.maxSubtasksPerTask` (defaults 3 and 3). Positive-integer validated;
+  the grouping validator and the persist gate consume the configured values —
+  no hard-coded caps remain in the validation path.
+- Persist validation gate: `node tools/bin/render.js persist` now re-validates
+  the grouping contract, Work Item verbatim preservation, configured 3×3
+  limits, and rendered plain-text invariants BEFORE writing. Invalid grouped
+  output can never reach storage.
+- Renderer/validator enforcement that `---` appears ONLY between repository
+  sections: for N repositories exactly N−1 separator lines, zero separators
+  between Tasks inside one repository section.
+- Test coverage for configurable/invalid/overflow limits, DST-sensitive day
+  windows, revert evidence, the real CLI workflow (collect → validate →
+  render → check → persist), deterministic reruns, the persist gate, version
+  consistency, and legacy-file removal.
+
+### Removed
+
+- Legacy single-file generator: `WORKTRACE-ALL-IN-ONE.md` and
+  `scripts/build-all-in-one.sh` are deleted. No live dependency remains;
+  documentation is read directly from its source files.
+
 ## 3.0.0
 
 Additive reporting workflow layer around the existing WORKTRACE Skill

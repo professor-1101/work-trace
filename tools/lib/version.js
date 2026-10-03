@@ -3,6 +3,6 @@
 // The installer, updater, CLI banner and tests read this value.
 // Keep package.json / VERSION / CHANGELOG in sync (enforced by tests).
 module.exports = {
-  VERSION: '3.0.0',
+  VERSION: '3.1.0',
   PACKAGE_NAME: '@worktrace/tools',
 };

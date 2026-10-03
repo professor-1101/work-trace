@@ -13,7 +13,7 @@ description: >
   alone). Instructions are English; report language follows configuration/user.
 metadata:
   author: work-trace
-  version: "3.0.0"
+  version: "3.1.0"
 compatibility: Requires Cline (Skills + terminal), Node.js >= 18, git on PATH, and a worktrace.yaml configuration. Cross-platform (Linux/Windows).
 ---
 
@@ -132,15 +132,17 @@ at most 3 Tasks (each Task at most 3 Subtasks). Write `.worktrace/tasks.json`:
 ### 4. Validate grouping + 3x3 (deterministic)
 
 ```bash
-node tools/bin/render.js validate-tasks --work-items .worktrace/work-items.json --tasks .worktrace/tasks.json --evidence .worktrace/evidence.json
+node tools/bin/render.js validate-tasks --work-items .worktrace/work-items.json --tasks .worktrace/tasks.json --evidence .worktrace/evidence.json --config worktrace.yaml
 ```
 
 This proves every Work Item appears exactly once with byte-identical title and
-report, and enforces max 3 Tasks / max 3 Subtasks. If a project genuinely has
-more than 9 independent outcomes that cannot be coherently grouped, DO NOT drop
-or fabricate merges to force the cap — stop, report the failure to the user
-naming the project and the offending Work Items, and leave the previous day's
-file untouched (documented behavior, see docs/grouping.md §Overflow).
+report, and enforces the configured grouping caps (`limits.maxTasksPerRepository`
+/ `limits.maxSubtasksPerTask`, defaults 3 Tasks / 3 Subtasks). If a project
+genuinely has more independent outcomes than the configured capacity allows and
+they cannot be coherently grouped, DO NOT drop or fabricate merges to force the
+cap — stop, report the failure to the user naming the project and the offending
+Work Items, and leave the previous day's file untouched (documented behavior,
+see docs/grouping.md §Overflow).
 
 ### 5. Render + check plain text (deterministic)
 
@@ -153,11 +155,16 @@ node tools/bin/render.js check --file .worktrace/report.txt --tasks .worktrace/t
 headings not shaped `{Project} - {Task Title}`. Fix `tasks.json` (never the
 rendered file) until OK.
 
-### 6. Persist (deterministic, atomic)
+### 6. Persist (deterministic, atomic, final validation gate)
 
 ```bash
-node tools/bin/render.js persist --tasks .worktrace/tasks.json
+node tools/bin/render.js persist --tasks .worktrace/tasks.json --work-items .worktrace/work-items.json
 ```
+
+`persist` is the final gate: it re-validates the grouping contract, verbatim
+Work Item preservation, the configured 3×3 limits, renders, validates the
+rendered document invariants, and only then writes. Invalid grouped output can
+never reach storage.
 
 Writes to the configured layout `{root}/YYYY/MM/DD/report.txt` under
 `reportRoot`, auto-creating directories; re-running atomically replaces the
