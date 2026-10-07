@@ -1,0 +1,50 @@
+# WORKTRACE workflow configuration — EXAMPLE (copied to worktrace.yaml on install)
+#
+# Copy to one of:
+#   <your workspace>/worktrace.yaml          (project scope, recommended)
+#   ~/.cline/worktrace/worktrace.yaml        (global)
+# or point $WORKTRACE_CONFIG / --config at any path.
+#
+# All paths accept "~", "~/..." and absolute paths.
+
+# Root directory that contains your project repositories (required).
+projectsRoot: ~/Documents/Projects
+
+# Root directory where daily reports are written (required). Auto-created.
+reportRoot: ~/Documents/WorkTrack/reports
+
+# IANA timezone used to decide "today" and commit day boundaries
+# (default Asia/Tehran). Validated against Intl on load.
+timezone: Asia/Tehran
+
+date:
+  behavior: today            # "today" | "offset:-1" (yesterday) ...
+
+discovery:
+  maxDepth: 6
+  followSymlinks: false
+  skipDirs:
+    - node_modules
+    - .venv
+    - venv
+    - __pycache__
+    - .next
+    - target
+    - build
+    - dist
+  include: []
+  exclude: []
+  ignore: []
+  nameOverrides: {}
+
+limits:
+  maxRepos: 200
+  maxCommitsPerRepo: 500
+  maxEvidenceBytesPerCommit: 204800
+  maxStatFiles: 200
+  maxTasksPerRepository: 3
+  maxSubtasksPerTask: 3
+
+output:
+  layout: "{root}/YYYY/MM/DD/report.txt"
+  atomicReplace: true

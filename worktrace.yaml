@@ -1,0 +1,66 @@
+# WORKTRACE workflow configuration (schema v1)
+#
+# Copy to one of:
+#   <your workspace>/worktrace.yaml          (project scope, recommended)
+#   ~/.cline/worktrace/worktrace.yaml       (global; Windows: %USERPROFILE%\.cline\worktrace\worktrace.yaml)
+# or point $WORKTRACE_CONFIG / --config at any path.
+#
+# All paths accept "~", "~/..." and absolute paths. Values may use "/" on both
+# Linux and Windows (Node normalizes separators).
+
+# Root directory that contains your project repositories (required).
+projectsRoot: ~/Documents/Projects
+
+# Root directory where daily reports are written (required). Auto-created.
+reportRoot: ~/Documents/WorkTrack/reports
+
+# IANA timezone used to decide "today" and commit day boundaries (required
+# semantics; default Asia/Tehran). Validated against Intl on load.
+timezone: Asia/Tehran
+
+date:
+  # "today" — the current calendar day in `timezone`.
+  # "offset:-1" — yesterday, etc. Deterministic for a given instant.
+  behavior: today
+
+discovery:
+  maxDepth: 6               # how deep below projectsRoot to look for .git
+  followSymlinks: false     # symlinked directories are skipped unless true
+  skipDirs:                 # directory names never descended into
+    - node_modules
+    - .venv
+    - venv
+    - __pycache__
+    - .next
+    - target
+    - build
+    - dist
+  include: []               # if non-empty: only repos under these prefixes
+  # repo-relative prefixes that stop descent entirely. Stale/removed git
+  # worktrees (dangling .git gitdir pointers) break the collector: discovery
+  # treats them as broken repositories and the run fails. Exclude them here.
+  exclude:
+    - dynamic-test-process-bundle/.claude/worktrees/engine-genericity-audit-review-9ffd18
+  ignore: []                # repos (prefix or derived project name) skipped from collection
+  nameOverrides: {}         # repo path relative to projectsRoot -> display name
+  # Example:
+  # nameOverrides:
+  #   apps/web: "Frontend Portal"
+  #   libs/core: "Core Library"
+
+limits:
+  maxRepos: 200                   # discovery fails loudly above this count
+  maxCommitsPerRepo: 500          # per-day cap; hitting it emits a warning
+  maxEvidenceBytesPerCommit: 204800  # full patch kept only within this budget
+  maxStatFiles: 200               # file-list lines kept per commit stat
+  # Grouping contract (the "3x3 rule"). Positive integers; defaults 3 and 3.
+  # The validator and the persist gate enforce these exact values. Overflow of
+  # genuinely independent outcomes fails the run loudly — Work Items are never
+  # silently dropped or fabricated to fit the caps.
+  maxTasksPerRepository: 3        # max Tasks per repository section
+  maxSubtasksPerTask: 3           # max Subtasks (Work Items) per Task
+
+output:
+  # Tokens: {root}, YYYY, MM, DD. Default daily layout:
+  layout: "{root}/YYYY/MM/DD/report.txt"
+  atomicReplace: true             # re-runs atomically overwrite the day's file

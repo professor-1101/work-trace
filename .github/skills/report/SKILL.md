@@ -1,0 +1,380 @@
+---
+name: report
+description: >
+  The unified WORKTRACE daily engineering report workflow (invoked as /report).
+  Use when the user invokes /report, asks for "the daily report", "گزارش روز",
+  "report of the day", a WORKTRACE run, a commit summary for management, or an
+  automated engineering-day report across all configured repositories. The skill
+  collects deterministic Git evidence, produces canonical Work Items, groups them
+  into Tasks, allocates hours, and persists the validated plain-text daily report.
+  SKIP for ad-hoc single-commit questions (answer directly).
+argument-hint: "[YYYY-MM-DD]"
+user-invocable: true
+version: "3.3.0"
+---
+
+# WORKTRACE /report — Unified Daily Engineering Report
+
+ONE skill, ONE workflow, ONE entry point: `/report [optional date]`.
+
+This skill OWNS the entire workflow end to end. There is no second skill to
+invoke: the semantic Work Item rules used to live in a separate
+`worktrace-daily-report` skill are now an internal reference of THIS skill
+([references/work-items.md](references/work-items.md)). Never call `use_skill`
+(for any skill) during a `/report` run; everything is local to this skill.
+
+Pipeline (fixed order — never skip or reorder a validation step):
+
+```text
+/report
+ -> load/validate config            (tools/bin/collect.js does this)
+ -> resolve today + timezone        (deterministic, from config)
+ -> discover repositories           (deterministic)
+ -> collect today's evidence        (deterministic JSON, Git-only)
+ -> produce canonical Work Items    (semantic layer: references/work-items.md)
+ -> validate Work Items             (tools/bin/render.js validate-workitems)
+ -> ASK USER «کار دیگه‌ای امروز نکردی؟»   (manual work intake — BEFORE grouping)
+ -> merge Manual Work Items         (tools/bin/render.js merge-manual)
+ -> group unified Work Items into Tasks (rules: references/grouping.md)
+ -> apply the Task-title value rule (references/grouping.md §Task-title value rule)
+ -> validate grouping + 3x3         (tools/bin/render.js validate-tasks)
+ -> ASK Task hours AFTER final Tasks (three modes; deterministic allocation)
+ -> allocate hours                 (tools/bin/render.js allocate-hours)
+ -> render plain text               (tools/bin/render.js render)
+ -> validate output                 (tools/bin/render.js check)
+ -> persist report                  (tools/bin/render.js persist — final gate)
+```
+
+## Hard invariants
+
+1. The semantic layer in [references/work-items.md](references/work-items.md) is
+   the ONLY source of Work Item meaning and report prose. Do not paraphrase
+   commits yourself, do not "simplify" its output, and do not re-derive its rules
+   from memory — load and follow that file during the Work Item and Task steps.
+2. Grouping operates ONLY on finished Canonical Work Items. Task titles are new
+   short labels; subtask title = Work Item title VERBATIM; subtask body =
+   Work Item report VERBATIM (byte-for-byte, including line breaks inside the
+   paragraph). Never rewrite, shorten, merge or translate a Work Item report
+   during or after grouping.
+3. All formatting/storage decisions below are enforced by deterministic scripts;
+   if a script says FAIL, fix your document — never edit the scripts' verdict
+   and never hand-write the final file bypassing `render` + `check`.
+4. Final artifact is genuine plain text (no Markdown, no labels, only `---`
+   separators). See [references/output-format.md](references/output-format.md).
+5. Task titles MUST satisfy the explicit outcome/value rule
+   ([references/grouping.md](references/grouping.md), §Task-title value rule).
+   An activity/chore-only title is a validation-stage defect: retitling happens
+   in the regroup pass, never silently.
+
+## Step-by-step procedure
+
+### 1. Collect evidence (deterministic)
+
+Run from the workspace root (the directory containing `worktrace.yaml`; if the
+user keeps global config, pass `--config` or rely on `$WORKTRACE_CONFIG`):
+
+```bash
+node tools/bin/collect.js --out .worktrace/evidence.json
+```
+
+- Non-zero exit => show the stderr reason to the user and STOP. Do not invent
+  evidence.
+- Zero commits everywhere => write an EMPTY report file for the day via
+  `persist` with an empty tasks document (see step 6) and tell the user the
+  file contains nothing because there were no commits today. That is a valid,
+  deterministic outcome.
+- Inspect `discovery.nested` / `discovery.ignored` / `discovery.warnings` in the
+  JSON: mention nested repositories and any discovered-and-skipped stale worktree
+  pointers to the user once per run so double-counted or pruned outcomes can be
+  reviewed.
+
+### 2. Produce Canonical Work Items (semantic layer)
+
+Load [references/work-items.md](references/work-items.md) and feed it the FULL
+evidence JSON (read `.worktrace/evidence.json`). Follow every rule of that file
+(evidence rules, processing chain, final split/merge re-audit, acceptance tests,
+and the Persian editorial rules in
+[references/persian-output.md](references/persian-output.md) when the configured
+report language is Persian). Then emit, per project that has commits, the
+canonical list:
+
+```json
+{
+  "projects": [
+    {
+      "project": "<exact value of repositories[i].project from evidence>",
+      "workItems": [
+        { "title": "<outcome-oriented Work Item title>", "report": "<final report text>" }
+      ]
+    }
+  ]
+}
+```
+
+Save it as `.worktrace/work-items.json`. Rules:
+- `report` is the deliverable narrative paragraph(s) only — no headings, no
+  Markdown, no commit hashes, no bullet lists.
+- One entry per independent engineering outcome, exactly as the semantic layer
+  decided. Do not pre-group here.
+
+Validate:
+
+```bash
+node tools/bin/render.js validate-workitems --evidence .worktrace/evidence.json --work-items .worktrace/work-items.json
+```
+
+Fix and re-run until OK.
+
+### 2b. Manual work intake (BEFORE grouping) — exact question
+
+After the Canonical Git Work Items are validated, ask the user EXACTLY this
+single question (verbatim, in Persian):
+
+`کار دیگه‌ای امروز نکردی؟`
+
+- The Git collector stays Git-only; nothing about manual work touches it.
+- If the user says no (نه / no / nothing): skip merging entirely — there are
+  NO Manual Work Items and the git document proceeds to grouping unchanged.
+- If the user says yes: convert each MEANINGFUL activity the user actually
+  mentions into one Manual Work Item. Meetings, discussions, code reviews,
+  investigations, documentation, planning, coordination and similar activities
+  qualify. Do NOT invent details: title and report come ONLY from what the
+  user said. Do NOT require structured or JSON input from the user — you
+  transcribe their own words into the internal shape:
+
+  ```json
+  [
+    { "title": "<short label of the activity as described>",
+      "report": "<what the user actually said about it>",
+      "project": "<OPTIONAL: only if the user explicitly tied it to a repository>" }
+  ]
+  ```
+
+  Save as `.worktrace/manual.json` (a bare array, or `{ "items": [...] }`).
+
+- Merge (unified set = Git Work Items + Manual Work Items). This MUST happen
+  before grouping:
+
+```bash
+node tools/bin/render.js merge-manual --evidence .worktrace/evidence.json --work-items .worktrace/work-items.json --manual .worktrace/manual.json --out .worktrace/work-items.json
+```
+
+Grouping rules for manual work:
+- A Manual Work Item may group with a Git Work Item ONLY when the user's own
+  description/evidence supports the relationship. Shared repository name,
+  domain, technology, date, team or topic is NEVER sufficient grounds to
+  group. When in doubt, keep them separate.
+- Genuinely unscoped manual work keeps an honest label (the user's own words,
+  or `""` for a bare section). Never invent a fake repository for it.
+- Existing Git Work Item reports are never changed by merging.
+
+### 3. Group into Tasks (post-Work-Item, semantic layer)
+
+Read [references/grouping.md](references/grouping.md). Group each project's
+Work Items (Git AND Manual, from the unified document) into at most 3 Tasks
+(each Task at most 3 Subtasks). Write `.worktrace/tasks.json`:
+
+```json
+{
+  "projects": [
+    {
+      "project": "alpha",
+      "tasks": [
+        { "title": "<short task label WITHOUT the project name>",
+          "subtasks": [ { "title": "<WI title verbatim>", "report": "<WI report verbatim>" } ] }
+      ]
+    }
+  ]
+}
+```
+
+**Task-title value rule (explicit):** before writing the document, check every
+Task title against [references/grouping.md](references/grouping.md) §Task-title
+value rule: the title must state the engineering OUTCOME/VALUE, not the
+activity or chore. Rewrite any title that fails it (a from-scratch build is
+NEVER a "refactor/rework" just because it replaced something). Only then
+validate.
+
+### 4. Validate grouping + 3x3 (deterministic)
+
+```bash
+node tools/bin/render.js validate-tasks --work-items .worktrace/work-items.json --tasks .worktrace/tasks.json --evidence .worktrace/evidence.json --config worktrace.yaml
+```
+
+This proves every Work Item appears exactly once with byte-identical title and
+report, and enforces the configured grouping caps (`limits.maxTasksPerRepository`
+/ `limits.maxSubtasksPerTask`, defaults 3 Tasks / 3 Subtasks). If a project
+genuinely has more independent outcomes than the capacity allows and they cannot
+be coherently grouped, DO NOT drop or fabricate merges to force the cap — stop,
+report the failure to the user naming the project and the offending Work Items,
+and leave the previous day's file untouched (documented behavior, see
+[references/grouping.md](references/grouping.md) §Overflow).
+
+### 4b. Task hours (AFTER final Tasks are determined)
+
+Only after grouping is VALIDATED and the final Task set is fixed, ask the
+user for per-Task hours. Present the final Task list and ask once. Three
+supported answer modes:
+
+- A. ALL SPECIFIED — the user gives a value for every Task
+  (`A=2h B=3h C=1.5h`). Preserve the exact user values; do NOT fill unused
+  time (a total below the daily budget is valid).
+- B. PARTIAL + BALANCE — the user gives values for some Tasks; the rest get
+  an equal share of `remaining = dailyTotal - explicitTotal` (dailyTotal is
+  the HARD product invariant 7.5h — NOT configurable by worktrace.yaml).
+- C. NONE SPECIFIED — split the full daily total equally across all final
+  Tasks.
+
+Hard rules (enforced deterministically by `allocate-hours`, never by you):
+explicit values are preserved exactly; no silent clipping or reduction;
+explicit total > daily limit => REJECT and tell the user; hours must be
+finite numbers >= 0; rounding is deterministic. If there are no final Tasks,
+hour collection is skipped entirely.
+
+Transcribe the user's answers into a JSON array aligned with the FINAL task
+order, using `null` for unspecified Tasks:
+
+```bash
+# Print the deterministic final-task order (projects alphabetical, tasks
+# alphabetical within project) so the allocation array aligns correctly:
+node tools/bin/render.js task-order --tasks .worktrace/tasks.json
+# Allocate (writes hours into tasks.json; rejects invalid input loudly):
+node tools/bin/render.js allocate-hours --tasks .worktrace/tasks.json --alloc '[2,3,null]' --config worktrace.yaml --out .worktrace/tasks.json
+```
+
+Never hand-edit hour values in `tasks.json`; never redistribute hours
+yourself. The script is the single source of hour arithmetic.
+
+### 5. Render + check plain text (deterministic)
+
+```bash
+node tools/bin/render.js render --tasks .worktrace/tasks.json --out .worktrace/report.txt
+node tools/bin/render.js check --file .worktrace/report.txt --tasks .worktrace/tasks.json
+```
+
+`check` rejects Markdown, prohibited structural labels, wrong separators and
+headings not shaped `{Project} - {Task Title}`. Fix `tasks.json` (never the
+rendered file) until OK.
+
+When the tasks document carries hour allocations, the SAME rendered file also
+contains exactly ONE trailing Daily Report section:
+
+```text
+گزارش روزانه
+{Task title} - {exact final hours}h
+```
+
+- Exactly one short line per FINAL Task (grounded task label + exact stored
+  hours), generated from Final Tasks only — it never re-runs Git analysis and
+  never rewrites Work Item reports.
+- No `---` separator is added for this section; `---` remains exclusively the
+  between-repository separator.
+- There is exactly ONE daily output file (`{root}/YYYY/MM/DD/report.txt`).
+  Never create a second report file or a second daily-report flow.
+
+### 6. Persist (deterministic, atomic, final validation gate)
+
+```bash
+node tools/bin/render.js persist --tasks .worktrace/tasks.json --config worktrace.yaml
+```
+
+Both `--work-items` and `--date` are OPTIONAL for `persist`:
+- `--date YYYY-MM-DD` — omit to persist for "today" in the configured timezone
+  (the default). Pass it only for backfilling a specific day.
+- `--work-items .worktrace/work-items.json` — when passed, the gate additionally
+  re-verifies Work Item preservation against the unified document. Pass it on
+  the normal flow so the gate is as strict as possible.
+
+`persist` is the final gate: it re-validates the grouping contract, verbatim
+Work Item preservation (Git AND Manual, when `--work-items` is given), the
+configured 3x3 limits, stored Task hours (finite, >= 0, total <= daily limit),
+renders, validates the rendered document invariants INCLUDING exactly one Daily
+Report section with one entry per Final Task whose hours match the stored Task
+hours, and only then writes atomically. Invalid grouped output can never reach
+storage — the existing day's file stays untouched.
+
+Writes to the configured layout `{root}/YYYY/MM/DD/report.txt` under
+`reportRoot`, auto-creating directories; re-running atomically replaces the
+day's file (last run wins; no accumulation). Print the absolute path to the
+user.
+
+For the zero-commit case:
+
+```bash
+echo '{"projects":[]}' > .worktrace/tasks.json
+node tools/bin/render.js persist --tasks .worktrace/tasks.json --config worktrace.yaml
+```
+
+## Tool-call mechanics (hard requirements for running this workflow)
+
+These failed a `/report` run in real operation; treat them as mandatory.
+
+1. **`commands` is always a real JSON array, never a string.** When invoking
+   the terminal tool with a command list, send `["cmd1", "cmd2"]`. A
+   stringified array (`"commands": "[\"cmd1\", \"cmd2\"]"`) is passed to the
+   shell as ONE literal command whose name starts with `[` — it fails with
+   `exit 127` and nothing actually runs.
+2. **Edits to existing files always carry an exact `old_text`/match.** Do not
+   send an editor call for an existing file without a match anchor; that
+   produces "file already exists / old_text omitted" errors and no change.
+   For brand-new files (e.g. first write of `.worktrace/tasks.json`) use a
+   create/write; for subsequent modifications always match existing content.
+3. **Keep edits small.** Split large writes (roughly >6k characters) into
+   sequential small edits; one oversized payload is rejected outright.
+4. **Never inline multi-KB JSON as a shell argument.** This CLI is strictly
+   path-based (`--tasks <path>`, `--work-items <path>`, `--manual <path>`);
+   write documents to `.worktrace/` and pass paths. The only inline JSON the
+   CLI accepts is the small `--alloc` array (`allocate-hours`).
+5. **Run one subcommand per line; verify exit codes.** After any pipeline
+   step, check the exit status before proceeding; on failure show stderr
+   verbatim and stop.
+
+## Failure policy
+
+- Any script exiting non-zero aborts the run with the script's message shown
+  verbatim. Never hand-craft the final report to bypass a failing validator.
+- Broken repositories reported by the collector are real failures: surface them
+  (path + reason) and let the user fix discovery config or the repo.
+- Discovered-but-skipped stale worktree pointers (dangling `.git` gitdir
+  files) are NON-fatal: they appear under `discovery.warnings`; mention them
+  once and continue — the run still exits 0.
+- Intermediate artifacts live under `.worktrace/` (git-ignored by convention);
+  they are overwritten on every run, keeping reruns deterministic.
+- Anti-bug checklist before finishing a run:
+  - [ ] every `commands` call was a real array (no exit-127 anywhere)?
+  - [ ] every edit of an existing file carried an exact match?
+  - [ ] every large document was written/split in small edits?
+  - [ ] all pipeline steps verified green (validate-workitems, validate-tasks,
+        check, persist)?
+  - [ ] final daily file path printed and byte-identical to the validated
+        render?
+
+## References
+
+- [references/work-items.md](references/work-items.md) — canonical Work Item
+  semantics: processing chain, grouping, reverts/WIP handling, outcome levels,
+  reader model, self-check (21 acceptance tests). THE semantic layer.
+- [references/grouping.md](references/grouping.md) — Task grouping rules, the
+  EXPLICIT Task-title value rule, 3x3 caps, overflow behavior, ordering.
+- [references/output-format.md](references/output-format.md) — exact plain-text
+  output contract.
+- [references/approved-rules.md](references/approved-rules.md) — canonical
+  RULE-01..RULE-04 specifications (normative; operational restatements defer
+  here).
+- [references/evidence-rules.md](references/evidence-rules.md) — context types,
+  forbidden invented facts, claim-evidence discipline.
+- [references/reader-model.md](references/reader-model.md) — reader
+  independence tests and terminology classes.
+- [references/validation.md](references/validation.md) — DODs, 21 acceptance
+  tests, reject patterns, scorecard.
+- [references/patterns.md](references/patterns.md) — worked BAD:/GOOD:
+  examples.
+- [references/persian-output.md](references/persian-output.md) — Persian report
+  language policy (load only for Persian output).
+- [references/ATTRIBUTION.md](references/ATTRIBUTION.md) — provenance and
+  licensing notes for the Persian language layer (read when redistributing).
+- [assets/report-template.md](assets/report-template.md) — output skeleton.
+- `evals/persian-language-evals.json` — behavior evaluations for the Persian
+  language layer (run when the language policy changes).
+- `evals/work-item-grouping-evals.json` — behavior evaluations for Work Item
+  decomposition (run when grouping rules change).

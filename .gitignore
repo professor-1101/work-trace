@@ -1,0 +1,8 @@
+# Node dependencies
+tools/node_modules/
+
+# WORKTRACE runtime working directory (evidence, drafts, rendered output)
+.worktrace/
+
+# Installer state generated in a self-installed workspace
+.cline/worktrace/
